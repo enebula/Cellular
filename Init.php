@@ -4,21 +4,24 @@
  * Cellular Framework
  *
  * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-1
+ * @version 1.0 2015-12-9
  *
  */
 
 class Cellular {
 
-	private static $frameworkPath; //框架根路径
-	private static $applicationPath; //应用程序路径
 	private static $rewrite; //开启关闭重定向
 	private static $classes; //实例化的对象
+	//应用程序结构体
+	private static $appStruct = array(
+		'controller' => 'controller',
+		'model' => 'model',
+		'view' => 'view'
+	); 
 
 	public function __construct()
 	{
-		self::$frameworkPath = dirname(__FILE__).DIRECTORY_SEPARATOR;
-		self::$applicationPath = null;
+		if (!isset($_SERVER['DOCUMENT_ROOT'])) die('DOCUMENT_ROOT error!');
 		self::$rewrite = true;
 		self::$classes = array(); //默认为空的关系数组
 	}
@@ -31,29 +34,42 @@ class Cellular {
 
 	public static function autoload($className)
 	{
-		$path = self::$frameworkPath . strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR)) . '.php';
-		if (!is_file($path))
-		{
-			$path = self::$applicationPath . strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR)) . '.php';
-			if (!is_file($path)) {
-				die ('File "'.$path.'"does not exist!');
-				return false;
-			}
+		$className = strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR));
+		//搜索应用程序目录
+		$path = self::$appStruct['rootPath'].DIRECTORY_SEPARATOR.$className.'.php';
+		if (is_file($path)) {
+			include_once($path);
+			return true;
 		}
-		//echo $path.'<br/>';
-		include_once($path);
-		return true;
+		//搜索Cellular目录－包含命名空间
+		$path = self::$appStruct['cellularPath'].DIRECTORY_SEPARATOR.$className.'.php';
+		if (is_file($path)) {
+			include_once($path);
+			return true;
+		}
+		return false;
 	}
 
 	/**
-	 * 设置应用属性
-	 * @param string $path 应用程序路径
+	 * 设置应用相对路径
+	 * @param array $path 应用程序参数
 	 * @return void
 	 */
 
-	public static function setApp($path)
+	public static function setAppRelativePath($path)
 	{
-		self::$applicationPath = $path;
+		self::$appStruct['relativePath'] = $path;
+	}
+
+	/**
+	 * 设置应用相对路径
+	 * @param array $path 应用程序参数
+	 * @return void
+	 */
+
+	public static function setAppRootPath($path)
+	{
+		self::$appStruct['rootPath'] = $path;
 	}
 
 	/**
@@ -68,16 +84,49 @@ class Cellular {
 	}
 
 	/**
+	 * 获取应用程序结构属性
+	 * @param string $name 属性名
+	 * @return string | array
+	 */
+
+	public static function getAppStruct($name = null)
+	{
+		if (null !== $name) {
+			return isset(self::$appStruct[$name]) ? self::$appStruct[$name] : null;
+		}
+		return self::$appStruct;
+	}
+
+	/**
 	 * 执行应用程序
 	 */
 
 	public static function application()
 	{
-		if (null !== self::$applicationPath) {
-			self::hub();
-		} else {
-			die('application path not null');
+		if (!isset(self::$appStruct['relativePath'])) {
+			self::$appStruct['relativePath'] = '';
 		}
+		if (!isset(self::$appStruct['rootPath'])) {
+			self::$appStruct['rootPath'] = $_SERVER['DOCUMENT_ROOT'];
+			if (!empty(self::$appStruct['relativePath'])) self::$appStruct['rootPath'] .= DIRECTORY_SEPARATOR.self::$appStruct['relativePath'];
+		}
+		self::$appStruct['cellularPath'] = dirname(__FILE__);
+		self::hub();
+	}
+
+	/**
+	 * 加载文件
+	 */
+
+	public static function loadFile($fileName, $return = false)
+	{
+		//检查文件名是否安全-防注入
+		if (!preg_match("/^[A-Za-z0-9_.]+$/", $fileName)) die('File name error!');
+		//解析文件路径
+		$file = strtr($fileName, '.', DIRECTORY_SEPARATOR);
+		$path = self::$appStruct['rootPath'].DIRECTORY_SEPARATOR.$file.'.php';
+		if (false === $return) include_once($path);
+		else return $path;
 	}
 
 	/**
@@ -86,12 +135,13 @@ class Cellular {
 
 	public static function loadClass($className)
 	{
-		//检查类名是否安全
+		//检查类名是否安全-防注入
 		if (!preg_match("/^[A-Za-z0-9_.]+$/", $className)) die('class name error!');
 		//检查是否已实例化
 		if (isset(self::$classes[$className])) return self::$classes[$className];
 		//实例化类
 		$class = strtr($className, '.', '\\'); //解析类名
+		
 		if (class_exists($class)) {
 			$fun = create_function(null, 'return new ' .$class. ';');
 			self::$classes[$className] = $fun();
@@ -117,24 +167,24 @@ class Cellular {
 			//暂时不支持路由器功能
 			$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
 			$requestURI = isset($removeParamURI{0}) ? $removeParamURI : $requestURI;
+			$requestURI = preg_replace("/^\/".self::$appStruct['relativePath']."\//", '', $requestURI); //过滤应用相当路径
 			$request = explode('/', $requestURI);
 			$request = array_filter($request);
-			//获取控制器
-			$controller = 'controller';
-			foreach ($request as $key => $value)
-			{
-				$controller .= DIRECTORY_SEPARATOR.$value;
-				unset($request[$key]);
-				if (!is_dir(self::$applicationPath.DIRECTORY_SEPARATOR.$controller)) break;
+			if (!empty($request)) {
+				//获取控制器
+				$controller = '';
+				$controllerDir = self::$appStruct['rootPath'].DIRECTORY_SEPARATOR.self::$appStruct['controller'];
+				foreach ($request as $key => $value) {
+					$controller .= DIRECTORY_SEPARATOR.$value;
+					unset($request[$key]);
+					if (!is_dir($controllerDir.$controller)) break;
+				}
+				$controller = strtr(substr($controller, 1), DIRECTORY_SEPARATOR, '.');
+				//获取动作
+				if ($request) {
+					$action = array_shift($request);
+				}
 			}
-			$controller = strtr($controller, '/', '.');
-			//获取动作
-			if ($request)
-			{
-				$action = array_shift($request);
-			}
-			//echo $controller.'->'.$action;
-			exit();
 		} else {
 			if (isset($_GET['c'])) {
 				$controller = $_GET['c'];
@@ -145,10 +195,11 @@ class Cellular {
 				unset($_GET['a']);
 			}
 		}
-		//检查动作名是否安全
+		//检查动作名是否安全-防注入
 		if (!preg_match("/^[A-Za-z0-9_]+$/", $action)) die('action name error!');
 		//加载控制器执行动作
-		$class = self::loadClass('controller.'.$controller);
+		//echo $controller.'->'.$action;
+		$class = self::loadClass(self::$appStruct['controller'].'.'.$controller);
 		if(method_exists($class, $action)) {
 			$class->$action();
 		}
