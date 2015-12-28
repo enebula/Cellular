@@ -20,8 +20,8 @@ class http
   public function post($url, $value)
   {
     $header = array();
-    $header[] = 'Content-Type: text/xml; charset=GBK2312';
-    $header[] = 'Content-Length: '.strlen($value);
+    //$header[] = 'Content-Type: text/xml; charset=GBK';
+    //$header[] = 'Content-Length: '.strlen($value);
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     //curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); //跳过SSL检查
@@ -32,7 +32,6 @@ class http
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $value);
     $output = curl_exec($curl);
     curl_close($curl);
-    //if (!$output) return false;
     return $output;
   }
 }

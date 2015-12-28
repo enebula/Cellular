@@ -19,13 +19,42 @@ class Cellular {
 		'controller' => 'controller',
 		'model' => 'model',
 		'view' => 'view'
-	); 
+	);
 
 	public function __construct()
 	{
 		if (!isset($_SERVER['DOCUMENT_ROOT'])) die('DOCUMENT_ROOT error!');
 		self::$rewrite = true;
 		self::$classes = array(); //默认为空的关系数组
+	}
+
+	/**
+	 * 调试信息
+	 * @param string $environment 环境状态
+	 * @return void
+	 */
+	public static function debug($environment)
+	{
+			switch ($environment)
+			{
+				//开发环境
+				case 'development':
+					ini_set("display_errors",'on');
+					error_reporting(E_ALL);
+					break;
+				//测试环境
+				case 'testing':
+					break;
+				//生产环境
+				case 'production':
+					ini_set('display_errors', 'off');
+					error_reporting(0);
+					break;
+				//没有定义正确的应用环境
+				default:
+					die('The application environment is not set correctly.');
+					break;
+			}
 	}
 
 	/**
@@ -125,7 +154,7 @@ class Cellular {
 		if (isset(self::$classes[$className])) return self::$classes[$className];
 		//实例化类
 		$class = strtr($className, '.', '\\'); //解析类名
-		
+
 		if (class_exists($class)) {
 			$fun = create_function(null, 'return new ' .$class. ';');
 			self::$classes[$className] = $fun();
