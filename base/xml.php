@@ -48,7 +48,7 @@ class Xml
       }
     }
   }
-  
+
   /**
    * json转为XML
    * @param array | string $json json数组格式
@@ -72,26 +72,19 @@ class Xml
    */
   public function xmlToObject($xml)
   {
-    if (function_exists('simplexml_load_string')) {
-      return simplexml_load_string($xml);
+    if (class_exists('SimpleXMLElement'))
+    {
+      try {
+        $xml = new \SimpleXMLElement($xml);
+        if (false === $xml) return false;
+        return $xml;
+      } catch (Exception $e) {
+        echo 'Exception:'. $e->getMessage();
+        return false;
+      }
     }
     return false;
   }
-
-  /**
-   * XML解析为json数组
-   * @param string $xml xml文本字符串
-   * @return array
-   */
-   public function xmlToArray($xml)
-   {
-     $xml = $this->xmlToObject($xml);
-     if (false !== $xml) {
-       $json = json_encode($xml);
-       return json_decode($json, true);
-     }
-     return false;
-   }
 
 }
 

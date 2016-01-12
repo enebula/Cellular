@@ -10,10 +10,11 @@
 
 class Cellular {
 
-	private static $rewrite; //开启关闭重定向
-	private static $classes; //实例化的对象
 	private static $frameworkPath; //框架根目录
 	private static $appRootPath; //应用程序根目录
+	private static $rewrite = true; //开启关闭重定向
+	private static $classes = array(); //实例化的对象
+	private static $timezone = 'Asia/Shanghai'; //时区
 	//应用程序结构体
 	private static $appStruct = array(
 		'controller' => 'controller',
@@ -21,11 +22,9 @@ class Cellular {
 		'view' => 'view'
 	);
 
-	public function __construct()
+	public function setTimezone($identifier)
 	{
-		if (!isset($_SERVER['DOCUMENT_ROOT'])) die('DOCUMENT_ROOT error!');
-		self::$rewrite = true;
-		self::$classes = array(); //默认为空的关系数组
+		self::$timezone = $identifier;
 	}
 
 	/**
@@ -124,6 +123,7 @@ class Cellular {
 	public static function application()
 	{
 		self::$frameworkPath = dirname(__FILE__);
+		date_default_timezone_set(self::$timezone); //设置默认时区
 		self::hub();
 	}
 
