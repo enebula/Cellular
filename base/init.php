@@ -9,9 +9,9 @@
  *
  */
 
- namespace base;
+namespace base;
 
- class init {
+class init {
 
     protected $class;
 
@@ -28,6 +28,6 @@
         return $this->class->$name;
     }
 
- }
+}
 
 ?>
