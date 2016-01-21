@@ -11,7 +11,7 @@
 class Cellular {
 
 	private static $frameworkPath; //框架根目录
-	private static $appRootPath; //应用程序根目录
+	private static $appPath; //应用程序根目录
 	private static $rewrite = true; //开启关闭重定向
 	private static $classes = array(); //实例化的对象
 	private static $timezone = 'Asia/Shanghai'; //时区
@@ -64,9 +64,9 @@ class Cellular {
 
 	public static function autoload($className)
 	{
-		$className = strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR));
+		$className = mb_strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR));
 		//搜索应用程序目录
-		$path = self::$appRootPath.DIRECTORY_SEPARATOR.$className.'.php';
+		$path = self::$appPath.DIRECTORY_SEPARATOR.$className.'.php';
 		if (is_file($path)) {
 			include_once($path);
 			return true;
@@ -78,17 +78,6 @@ class Cellular {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * 设置应用程序路径
-	 * @param array $path 应用程序参数
-	 * @return void
-	 */
-
-	public static function setAppRootPath($path)
-	{
-		self::$appRootPath = $path;
 	}
 
 	/**
@@ -117,11 +106,12 @@ class Cellular {
 	}
 
 	/**
-	 * 执行应用程序
+	 * 框架主入口 执行应用程序
 	 */
 
-	public static function application()
+	public static function application($path)
 	{
+		self::$appPath = $path;
 		self::$frameworkPath = dirname(__FILE__);
 		date_default_timezone_set(self::$timezone); //设置默认时区
 		self::hub();
@@ -137,7 +127,7 @@ class Cellular {
 		if (!preg_match("/^[A-Za-z0-9_.]+$/", $fileName)) die('File name error!');
 		//解析文件路径
 		$file = strtr($fileName, '.', DIRECTORY_SEPARATOR);
-		$path = self::$appRootPath.DIRECTORY_SEPARATOR.$file.'.php';
+		$path = self::$appPath.DIRECTORY_SEPARATOR.$file.'.php';
 		if (false === $return) include_once($path);
 		else return $path;
 	}
@@ -176,7 +166,7 @@ class Cellular {
 		//解析请求
 		if (false !== self::$rewrite) {
 			//获取请求资源ID
-			$requestURI = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : false; //暂时只支持apache服务器
+			$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : false);
 			//暂时不支持路由器功能
 			$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
 			$requestURI = isset($removeParamURI{0}) ? $removeParamURI : $requestURI;
@@ -190,7 +180,7 @@ class Cellular {
 			if (!empty($request)) {
 				//获取控制器
 				$controller = '';
-				$controllerDir = self::$appRootPath.DIRECTORY_SEPARATOR.self::$appStruct['controller'];
+				$controllerDir = self::$appPath.DIRECTORY_SEPARATOR.self::$appStruct['controller'];
 				foreach ($request as $key => $value) {
 					$controller .= DIRECTORY_SEPARATOR.$value;
 					unset($request[$key]);

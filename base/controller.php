@@ -2,38 +2,24 @@
 /**
  *
  * Cellular Framework
+ * 控制器基础类
  *
  * @author mark weixuan.1987@hotmail.com
  * @version 1.0 2015-12-9
  *
  */
+
 namespace base;
 
-class Controller {
+class Controller extends Init {
 
-	protected $class;
 	protected $model;
 	private $viewData;
 	private $viewCache;
 
 	/**
-	 * 加载实例类
-	 */
-
-	protected function loadClass($className)
-	{
-		if (null === $this->class) $this->class = new \stdClass();
-		$name = strtr($className, '.', '_');
-		if (!isset($this->class->$name)) {
-			$this->class->$name = \Cellular::loadClass($className);
-		}
-		return $this->class->$name;
-	}
-
-	/**
 	 * 加载模型
 	 */
-
 	protected function model($name)
 	{
 		if (null === $this->model) $this->model = new \stdClass();
@@ -46,7 +32,6 @@ class Controller {
 	/**
 	 * 视图赋值
 	 */
-
 	protected function assign($variable, $value)
 	{
 		$this->viewData[$variable] = $value;
@@ -55,7 +40,6 @@ class Controller {
 	/**
 	 * 渲染视图
 	 */
-
 	protected function display($name)
 	{
 		if ($this->viewData) extract($this->viewData);
@@ -70,7 +54,6 @@ class Controller {
 	/**
 	 * 输出页面缓存
 	 */
-
 	protected function getCache()
 	{
 		return $this->viewCache;
