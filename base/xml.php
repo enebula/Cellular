@@ -47,7 +47,7 @@ class Xml {
                 }
             } else {
                 $text = $this->doc->createTextNode($value);
-            $   root->appendChild($text);
+                $root->appendChild($text);
             }
         }
     }
