@@ -14,8 +14,16 @@ namespace base;
 class Controller extends Init {
 
 	protected $model;
+	protected $input;
+	protected $http;
 	private $viewData;
 	private $viewCache;
+
+	public function __construct()
+	{
+		$this->input = $this->loadClass('base.Input');
+		$this->http = $this->loadClass('base.Http');
+	}
 
 	/**
 	 * 加载模型
