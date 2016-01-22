@@ -61,7 +61,6 @@ class Cellular {
 	 * @param string $className 类名称 lib.loader
 	 * @return boolean true|false
 	 */
-
 	public static function autoload($className)
 	{
 		$className = mb_strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR));
@@ -85,30 +84,14 @@ class Cellular {
 	 * @param boolean true|false
 	 * @return void
 	 */
-
 	public static function setRewrite($status)
 	{
 		if (is_bool($status)) self::$rewrite = $status;
 	}
 
 	/**
-	 * 获取应用程序结构属性
-	 * @param string $name 属性名
-	 * @return string | array
-	 */
-
-	public static function getAppStruct($name = null)
-	{
-		if (null !== $name) {
-			return isset(self::$appStruct[$name]) ? self::$appStruct[$name] : null;
-		}
-		return self::$appStruct;
-	}
-
-	/**
 	 * 框架主入口 执行应用程序
 	 */
-
 	public static function application($path)
 	{
 		self::$appPath = $path;
@@ -120,35 +103,33 @@ class Cellular {
 	/**
 	 * 加载文件
 	 */
-
-	public static function loadFile($fileName, $return = false)
+	public static function loadFile($fileName)
 	{
 		//检查文件名是否安全-防注入
 		if (!preg_match("/^[A-Za-z0-9_.]+$/", $fileName)) die('File name error!');
 		//解析文件路径
 		$file = strtr($fileName, '.', DIRECTORY_SEPARATOR);
 		$path = self::$appPath.DIRECTORY_SEPARATOR.$file.'.php';
-		if (false === $return) include_once($path);
-		else return $path;
+		if (is_file($path)) {
+			include_once($path);
+			return true;
+		}
+		return false;
 	}
 
 	/**
-	 * 实例化类
+	 * 装载类
 	 */
-
-	public static function loadClass($className)
+	public static function loadClass($className, $param = null)
 	{
 		//检查类名是否安全-防注入
 		if (!preg_match("/^[A-Za-z0-9_.]+$/", $className)) die('class name error!');
 		//检查是否已实例化
 		if (isset(self::$classes[$className])) return self::$classes[$className];
 		//实例化类
-		$class = strtr($className, '.', '\\'); //解析类名
-
+		$class = '\\'.strtr($className, '.', '\\'); //解析类名
 		if (class_exists($class)) {
-			$fun = create_function(null, 'return new ' .$class. ';');
-			self::$classes[$className] = $fun();
-			return self::$classes[$className];
+			return self::$classes[$className] = new $class($param);
 		} else {
 			die('class "'.$class.'" does not exist');
 		}
@@ -156,9 +137,18 @@ class Cellular {
 	}
 
 	/**
+	 * 卸载类
+	 */
+	public static function remvoeClass($className)
+	{
+		//检查类名是否安全-防注入
+		if (!preg_match("/^[A-Za-z0-9_.]+$/", $className)) die('class name error!');
+		if (isset(self::$classes[$className])) unset(self::$classes[$className]);
+	}
+
+	/**
 	 * 控制器转发
 	 */
-
 	private static function hub()
 	{
 		$controller = 'index';

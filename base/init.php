@@ -18,12 +18,12 @@ class init {
     /**
     * 加载实例类
     */
-    protected function loadClass($className)
+    protected function loadClass($className, $param = null)
     {
         if (null === $this->class) $this->class = new \stdClass();
         $name = strtr($className, '.', '_');
         if (!isset($this->class->$name)) {
-            $this->class->$name = \Cellular::loadClass($className);
+            $this->class->$name = \Cellular::loadClass($className, $param);
         }
         return $this->class->$name;
     }
