@@ -15,7 +15,7 @@ class checkService {
         }
     }
 
-    private check()
+    private function check()
     {
         if (!function_exists('mb_strtolower')) {
             $this->output('Not install mbString');
