@@ -6,7 +6,7 @@ class checkService {
 
     private $error;
 
-    function __construct(argument)
+    function __construct()
     {
         $this->error = true;
         $this->check();
