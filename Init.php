@@ -12,6 +12,7 @@ class Cellular {
 
 	private static $frameworkPath; //框架根目录
 	private static $appPath; //应用程序根目录
+	private static $appName; //应用程序名称
 	private static $rewrite = true; //开启关闭重定向
 	private static $classes = array(); //实例化的对象
 	private static $timezone = 'Asia/Shanghai'; //时区
@@ -65,7 +66,7 @@ class Cellular {
 	{
 		$className = mb_strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR));
 		//搜索应用程序目录
-		$path = self::$appPath.DIRECTORY_SEPARATOR.$className.'.php';
+		$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$className.'.php';
 		if (is_file($path)) {
 			include_once($path);
 			return true;
@@ -86,15 +87,16 @@ class Cellular {
 	 */
 	public static function setRewrite($status)
 	{
-		if (is_bool($status)) self::$rewrite = $status;
+		//if (is_bool($status)) self::$rewrite = $status;
 	}
 
 	/**
 	 * 框架主入口 执行应用程序
 	 */
-	public static function application($path)
+	public static function application($path, $name = null)
 	{
 		self::$appPath = $path;
+		self::$appName = $name;
 		self::$frameworkPath = dirname(__FILE__);
 		date_default_timezone_set(self::$timezone); //设置默认时区
 		self::hub();
@@ -109,7 +111,7 @@ class Cellular {
 		if (!preg_match("/^[A-Za-z0-9_.]+$/", $fileName)) die('File name error!');
 		//解析文件路径
 		$file = strtr($fileName, '.', DIRECTORY_SEPARATOR);
-		$path = self::$appPath.DIRECTORY_SEPARATOR.$file.'.php';
+		$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$file.'.php';
 		if (is_file($path)) {
 			include_once($path);
 			return true;
@@ -153,36 +155,41 @@ class Cellular {
 	{
 		$controller = 'index';
 		$action = 'main';
-		//解析请求
-		if (false !== self::$rewrite) {
-			//获取请求资源ID
-			$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : false);
-			//暂时不支持路由器功能
-			$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
-			$requestURI = isset($removeParamURI{0}) ? $removeParamURI : $requestURI;
-			//获取入口相对web服务根目录路径
-			$webRootPath = substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/'));
-			if (!empty($webRootPath)) {
-				$requestURI = preg_replace("/^\\".$webRootPath."/", '', $requestURI); //过滤应用相当路径
+		//解析控制器与动作参数
+		if (true === self::$rewrite) {
+			//获取应用名
+			if (null == self::$appName) {
+				self::$appName = substr($_SERVER['SCRIPT_NAME'], 1, strripos($_SERVER['SCRIPT_NAME'], '/')-1);
 			}
-			$request = explode('/', $requestURI);
-			$request = array_filter($request);
-			if (!empty($request)) {
-				//获取控制器
-				$controller = '';
-				$controllerDir = self::$appPath.DIRECTORY_SEPARATOR.self::$appStruct['controller'];
-				foreach ($request as $key => $value) {
-					$controller .= DIRECTORY_SEPARATOR.$value;
-					unset($request[$key]);
-					if (!is_dir($controllerDir.$controller)) break;
-				}
-				$controller = strtr(substr($controller, 1), DIRECTORY_SEPARATOR, '.');
-				//获取动作
-				if ($request) {
-					$action = array_shift($request);
+			//获取请求资源ID
+			$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? str_replace('/'.self::$appName.'/', '', $_SERVER['REQUEST_URI']) : '');
+			//执行请求资源
+			if (!preg_match("/^[A-Za-z0-9_.\/%&#@]+$/", $requestURI) && $requestURI != '') {
+				die('URI not allowed!');
+			} else {
+				//暂时不支持路由器功能
+				$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
+				$requestURI = isset($removeParamURI{0}) ? $removeParamURI : $requestURI;
+				$request = explode('/', $requestURI);
+				$request = array_filter($request);
+				if (!empty($request)) {
+					//获取控制器
+					$controller = '';
+					$controllerDir = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.self::$appStruct['controller'];
+					foreach ($request as $key => $value) {
+						$controller .= DIRECTORY_SEPARATOR.$value;
+						unset($request[$key]);
+						if (!is_dir($controllerDir.$controller)) break;
+					}
+					$controller = strtr(substr($controller, 1), DIRECTORY_SEPARATOR, '.');
+					//获取动作
+					if ($request) {
+						$action = array_shift($request);
+					}
 				}
 			}
 		} else {
+			//暂时不开启此功能,需要增加安全检查
 			if (isset($_GET['c'])) {
 				$controller = $_GET['c'];
 				unset($_GET['c']);
