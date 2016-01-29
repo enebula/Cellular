@@ -13,9 +13,14 @@ class Cellular {
 	private static $frameworkPath; //框架根目录
 	private static $appPath; //应用程序根目录
 	private static $appName; //应用程序名称
-	private static $rewrite = true; //开启关闭重定向
-	private static $classes = array(); //实例化的对象
-	private static $timezone = 'Asia/Shanghai'; //时区
+	private static $errorMsg;
+
+	//开启关闭重定向
+	private static $rewrite = true;
+	//时区
+	private static $timezone = 'Asia/Shanghai';
+	//实例化的对象
+	private static $classes = array();
 	//应用程序结构体
 	private static $appStruct = array(
 		'controller' => 'controller',
@@ -49,10 +54,6 @@ class Cellular {
 				case 'production':
 					ini_set('display_errors', 'off');
 					error_reporting(0);
-					break;
-				//没有定义正确的应用环境
-				default:
-					die('The application environment is not set correctly.');
 					break;
 			}
 	}
@@ -99,22 +100,30 @@ class Cellular {
 		self::$appName = $name;
 		self::$frameworkPath = dirname(__FILE__);
 		date_default_timezone_set(self::$timezone); //设置默认时区
-		self::hub();
+		if (false === self::hub()) {
+			self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
+		}
 	}
 
 	/**
 	 * 加载文件
 	 */
-	public static function loadFile($fileName)
+	public static function loadFile($file)
 	{
 		//检查文件名是否安全-防注入
-		if (!preg_match("/^[A-Za-z0-9_.]+$/", $fileName)) die('File name error!');
-		//解析文件路径
-		$file = strtr($fileName, '.', DIRECTORY_SEPARATOR);
-		$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$file.'.php';
-		if (is_file($path)) {
-			include_once($path);
-			return true;
+		if (preg_match("/^[A-Za-z0-9_\/.]+$/", $file)) {
+			//解析文件路径
+			$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$file;
+			if (is_file($path)) {
+				include_once($path);
+				return true;
+			}
+			//搜索Cellular目录－包含命名空间
+			$path = self::$frameworkPath.DIRECTORY_SEPARATOR.$file;
+			if (is_file($path)) {
+				include_once($path);
+				return true;
+			}
 		}
 		return false;
 	}
@@ -125,15 +134,15 @@ class Cellular {
 	public static function loadClass($className, $param = null)
 	{
 		//检查类名是否安全-防注入
-		if (!preg_match("/^[A-Za-z0-9_.]+$/", $className)) die('class name error!');
-		//检查是否已实例化
-		if (isset(self::$classes[$className])) return self::$classes[$className];
-		//实例化类
-		$class = '\\'.strtr($className, '.', '\\'); //解析类名
-		if (class_exists($class)) {
-			return self::$classes[$className] = new $class($param);
-		} else {
-			die('class "'.$class.'" does not exist');
+		if (preg_match("/^[A-Za-z0-9_.]+$/", $className)) {
+			//检查是否已实例化
+			if (isset(self::$classes[$className])) return self::$classes[$className];
+			//实例化类
+			$class = '\\'.strtr($className, '.', '\\'); //解析类名
+			if (class_exists($class)) {
+				return self::$classes[$className] = new $class($param);
+			}
+			//die('class "'.$class.'" does not exist');
 		}
 		return false;
 	}
@@ -144,8 +153,13 @@ class Cellular {
 	public static function remvoeClass($className)
 	{
 		//检查类名是否安全-防注入
-		if (!preg_match("/^[A-Za-z0-9_.]+$/", $className)) die('class name error!');
-		if (isset(self::$classes[$className])) unset(self::$classes[$className]);
+		if (!preg_match("/^[A-Za-z0-9_.]+$/", $className)) {
+			if (isset(self::$classes[$className])) {
+				unset(self::$classes[$className]);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -163,9 +177,15 @@ class Cellular {
 			}
 			//获取请求资源ID
 			$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? str_replace('/'.self::$appName.'/', '', $_SERVER['REQUEST_URI']) : '');
+			//过滤子目录
+			$requestURI = str_replace(substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/')), '', $requestURI);
 			//执行请求资源
 			if (!preg_match("/^[A-Za-z0-9_.\/%&#@]+$/", $requestURI) && $requestURI != '') {
-				die('URI not allowed!');
+				self::$errorMsg = array(
+					'code' => '400',
+					'msg' => 'URI not allowed!'
+				);
+				return false;
 			} else {
 				//暂时不支持路由器功能
 				$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
@@ -200,12 +220,44 @@ class Cellular {
 			}
 		}
 		//检查动作名是否安全-防注入
-		if (!preg_match("/^[A-Za-z0-9_]+$/", $action)) die('action name error!');
+		if (!preg_match("/^[A-Za-z0-9_]+$/", $controller)) {
+			self::$errorMsg = array(
+				'code' => '400',
+				'msg' => 'controller error!'
+			);
+			return false;
+		}
+		if (!preg_match("/^[A-Za-z0-9_]+$/", $action)) {
+			self::$errorMsg = array(
+				'code' => '400',
+				'msg' => 'action error!'
+			);
+			return false;
+		}
 		//加载控制器执行动作
-		//echo $controller.'->'.$action.'<br/>';
 		$class = self::loadClass(self::$appStruct['controller'].'.'.$controller);
-		if(method_exists($class, $action)) {
-			$class->$action();
+		if (false !== $class) {
+			if(method_exists($class, $action)) {
+				$class->$action();
+				return true;
+			}
+		}
+		self::$errorMsg = array(
+			'code' => '404',
+			'msg' => 'page not !'
+		);
+		return false;
+	}
+
+	private static function error($code, $msg = null)
+	{
+		switch ($code) {
+			case '400':
+				self::loadFile('error/400.html');
+				break;
+			case '404':
+				self::loadFile('error/404.html');
+				break;
 		}
 	}
 
