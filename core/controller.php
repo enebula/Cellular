@@ -9,9 +9,9 @@
  *
  */
 
-namespace base;
+namespace core;
 
-class Controller extends Init {
+class Controller extends Base {
 
 	protected $model;
 	protected $input;

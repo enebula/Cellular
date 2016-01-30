@@ -9,7 +9,7 @@
  *
  */
 
-namespace base;
+namespace core;
 
 class redis {
 

@@ -9,9 +9,9 @@
  *
  */
 
-namespace base;
+namespace core;
 
-class init {
+class Base {
 
     protected $class;
 
