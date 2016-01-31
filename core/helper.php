@@ -45,6 +45,14 @@ class Helper {
         return $token;
     }
 
+    /**
+     * URI生成
+     */
+    public static function URL($url, $param)
+    {
+
+    }
+
 }
 
 ?>

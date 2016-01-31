@@ -10,6 +10,7 @@
  */
 
 namespace core;
+use Cellular;
 
 class Controller extends Base {
 
@@ -32,8 +33,8 @@ class Controller extends Base {
 	{
 		if (null === $this->model) $this->model = new \stdClass();
 		if (!isset($this->model->$name)) {
-			$class = \Cellular::getAppStruct('model'). '.' .$name;
-			$this->model->$name = \Cellular::loadClass($class);
+			$class = Cellular::getAppStruct('model'). '.' .$name;
+			$this->model->$name = Cellular::loadClass($class);
 		}
 	}
 
@@ -51,10 +52,9 @@ class Controller extends Base {
 	protected function display($name)
 	{
 		if ($this->viewData) extract($this->viewData);
-		$file = \Cellular::getAppStruct('view'). '.' .$name;
-		$path = \Cellular::loadFile($file, true);
+		$file = Cellular::$appStruct['view']. '/' .$name.'.html';
 		ob_start(); //开启缓冲区
-		include_once($path);
+		Cellular::loadFile($file);
 		$this->viewCache = ob_get_contents();
 		ob_end_flush(); //关闭缓存并清空
 	}

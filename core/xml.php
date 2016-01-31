@@ -70,7 +70,7 @@ class Xml {
                 }
                 return $this->doc->saveXML();
             } catch (Exception $e) {
-                echo 'Exception:'.$e->getMessage();
+                echo 'XML Exception:'.$e->getMessage();
             }
         } else {
             echo 'The "Xml" class "DOMDocument dependency" is missing';
@@ -92,7 +92,7 @@ class Xml {
                     if (false === $xml) return false;
                     return $xml;
                 } catch (Exception $e) {
-                    echo 'Exception:'.$e->getMessage();
+                    echo 'XML Exception:'.$e->getMessage();
                 }
             } else {
                 echo 'The "Xml" class "SimpleXMLElement dependency" is missing';

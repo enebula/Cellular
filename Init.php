@@ -13,7 +13,9 @@ class Cellular {
 	private static $frameworkPath; //框架根目录
 	private static $appPath; //应用程序根目录
 	private static $appName; //应用程序名称
-	private static $errorMsg;
+	private static $config; //应用配置文件
+	private static $URI; //URI请求资源
+	private static $errorMsg; //web访问错误信息
 
 	//开启关闭重定向
 	private static $rewrite = true;
@@ -22,11 +24,34 @@ class Cellular {
 	//实例化的对象
 	private static $classes = array();
 	//应用程序结构体
-	private static $appStruct = array(
+	public static $appStruct = array(
 		'controller' => 'controller',
 		'model' => 'model',
 		'view' => 'view'
 	);
+
+	/**
+	 * 框架主入口 执行应用程序
+	 */
+	public static function application($path, $name = null)
+	{
+		self::$appPath = $path;
+		self::$appName = $name;
+		self::$frameworkPath = dirname(__FILE__);
+		date_default_timezone_set(self::$timezone); //设置默认时区
+		//获取uri
+		if (false === self::getURI()) {
+			self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
+		}
+		//加载应用配置文件
+		$config = self::loadFile('config/app.php');
+		//定义常量
+		define('ASSETS', isset($config['assets_path']) ? $config['assets_path'] : '');
+		//启动转发器
+		if (false === self::hub()) {
+			self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
+		}
+	}
 
 	public function setTimezone($identifier)
 	{
@@ -40,22 +65,22 @@ class Cellular {
 	 */
 	public static function debug($environment)
 	{
-			switch ($environment)
-			{
-				//开发环境
-				case 'development':
-					ini_set("display_errors",'on');
-					error_reporting(E_ALL);
-					break;
-				//测试环境
-				case 'testing':
-					break;
-				//生产环境
-				case 'production':
-					ini_set('display_errors', 'off');
-					error_reporting(0);
-					break;
-			}
+		switch ($environment)
+		{
+			//开发环境
+			case 'development':
+				ini_set("display_errors",'on');
+				error_reporting(E_ALL);
+				break;
+			//测试环境
+			case 'testing':
+				break;
+			//生产环境
+			case 'production':
+				ini_set('display_errors', 'off');
+				error_reporting(0);
+				break;
+		}
 	}
 
 	/**
@@ -65,44 +90,40 @@ class Cellular {
 	 */
 	public static function autoload($className)
 	{
-		$className = mb_strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR));
-		//搜索应用程序目录
-		$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$className.'.php';
-		if (is_file($path)) {
-			include_once($path);
-			return true;
-		}
-		//搜索Cellular目录－包含命名空间
-		$path = self::$frameworkPath.DIRECTORY_SEPARATOR.$className.'.php';
-		if (is_file($path)) {
-			include_once($path);
-			return true;
+		$className = mb_strtolower(strtr($className, '\\', DIRECTORY_SEPARATOR)).'.php';
+		return self::loadFile($className);
+	}
+
+	/**
+	 * 获取文件路径
+	 */
+	public static function getFilePath($file)
+	{
+		//检查文件名是否安全-防注入
+		if (preg_match("/^[A-Za-z0-9_\/.]+$/", $file)) {
+			//解析文件路径
+			$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$file;
+			if (is_file($path)) {
+				return $path;
+			}
+			//搜索Cellular目录－包含命名空间
+			$path = self::$frameworkPath.DIRECTORY_SEPARATOR.$file;
+			if (is_file($path)) {
+				return $path;
+			}
 		}
 		return false;
 	}
 
 	/**
-	 * 开启关闭URL重写
-	 * @param boolean true|false
-	 * @return void
+	 * 读取文件
 	 */
-	public static function setRewrite($status)
+	public static function getFile($file)
 	{
-		//if (is_bool($status)) self::$rewrite = $status;
-	}
-
-	/**
-	 * 框架主入口 执行应用程序
-	 */
-	public static function application($path, $name = null)
-	{
-		self::$appPath = $path;
-		self::$appName = $name;
-		self::$frameworkPath = dirname(__FILE__);
-		date_default_timezone_set(self::$timezone); //设置默认时区
-		if (false === self::hub()) {
-			self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
+		if ($path = self::getFilePath($file)) {
+			return file_get_contents($path);
 		}
+		return false;
 	}
 
 	/**
@@ -110,20 +131,8 @@ class Cellular {
 	 */
 	public static function loadFile($file)
 	{
-		//检查文件名是否安全-防注入
-		if (preg_match("/^[A-Za-z0-9_\/.]+$/", $file)) {
-			//解析文件路径
-			$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$file;
-			if (is_file($path)) {
-				include_once($path);
-				return true;
-			}
-			//搜索Cellular目录－包含命名空间
-			$path = self::$frameworkPath.DIRECTORY_SEPARATOR.$file;
-			if (is_file($path)) {
-				include_once($path);
-				return true;
-			}
+		if ($path = self::getFilePath($file)) {
+			return include_once($path);
 		}
 		return false;
 	}
@@ -142,7 +151,6 @@ class Cellular {
 			if (class_exists($class)) {
 				return self::$classes[$className] = new $class($param);
 			}
-			//die('class "'.$class.'" does not exist');
 		}
 		return false;
 	}
@@ -162,75 +170,81 @@ class Cellular {
 		return false;
 	}
 
+	private static function getURI()
+	{
+		//获取请求资源ID
+		$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? str_replace('/'.self::$appName.'/', '', $_SERVER['REQUEST_URI']) : '');
+		//过滤脚本目录
+		$requestURI = str_replace(substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/')), '', $requestURI);
+		//请求资源检查
+		if (!preg_match("/^[A-Za-z0-9_.\/%&#@]+$/", $requestURI)) {
+			self::$errorMsg = array(
+				'code' => '400',
+				'msg' => 'URI not allowed!'
+			);
+			return false;
+		}
+		//通过脚本路径获取应用名
+		if (null == self::$appName) {
+			self::$appName = substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/'));
+		}
+		if ($requestURI != '') {
+			$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
+			$requestURI = isset($removeParamURI{0}) ? $removeParamURI : $requestURI;
+			$request = explode('/', $requestURI);
+			$request = array_filter($request);
+			//通过URI获取应用名
+			if (!self::$appName) {
+				$_var = self::$appPath;
+				foreach ($request as $key => $value) {
+					$_var .= DIRECTORY_SEPARATOR.$value;
+					if (!is_dir($_var)) break;
+					self::$appName .= DIRECTORY_SEPARATOR.$value;
+					unset($request[$key]);
+				}
+				self::$appName = substr(self::$appName, 1);
+			}
+			self::$URI = $request;
+		}
+		return true;
+	}
+
 	/**
 	 * 控制器转发
 	 */
 	private static function hub()
 	{
-		$controller = 'index';
+		$controller = 'Index';
 		$action = 'main';
 		//解析控制器与动作参数
-		if (true === self::$rewrite) {
-			//获取应用名
-			if (null == self::$appName) {
-				self::$appName = substr($_SERVER['SCRIPT_NAME'], 1, strripos($_SERVER['SCRIPT_NAME'], '/')-1);
+		if (self::$URI) {
+			//获取控制器
+			$request = self::$URI;
+			$controller = '';
+			$controllerDir = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.self::$appStruct['controller'];
+			foreach ($request as $key => $value) {
+				$controller .= DIRECTORY_SEPARATOR.$value;
+				unset($request[$key]);
+				if (!is_dir($controllerDir.$controller)) break;
 			}
-			//获取请求资源ID
-			$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? str_replace('/'.self::$appName.'/', '', $_SERVER['REQUEST_URI']) : '');
-			//过滤子目录
-			$requestURI = str_replace(substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/')), '', $requestURI);
-			//执行请求资源
-			if (!preg_match("/^[A-Za-z0-9_.\/%&#@]+$/", $requestURI) && $requestURI != '') {
-				self::$errorMsg = array(
-					'code' => '400',
-					'msg' => 'URI not allowed!'
-				);
-				return false;
-			} else {
-				//暂时不支持路由器功能
-				$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
-				$requestURI = isset($removeParamURI{0}) ? $removeParamURI : $requestURI;
-				$request = explode('/', $requestURI);
-				$request = array_filter($request);
-				if (!empty($request)) {
-					//获取控制器
-					$controller = '';
-					$controllerDir = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.self::$appStruct['controller'];
-					foreach ($request as $key => $value) {
-						$controller .= DIRECTORY_SEPARATOR.$value;
-						unset($request[$key]);
-						if (!is_dir($controllerDir.$controller)) break;
-					}
-					$controller = strtr(substr($controller, 1), DIRECTORY_SEPARATOR, '.');
-					//获取动作
-					if ($request) {
-						$action = array_shift($request);
-					}
-				}
-			}
-		} else {
-			//暂时不开启此功能,需要增加安全检查
-			if (isset($_GET['c'])) {
-				$controller = $_GET['c'];
-				unset($_GET['c']);
-			}
-			if (isset($_GET['a'])) {
-				$action = $_GET['a'];
-				unset($_GET['a']);
+			$controller = strtr(substr($controller, 1), DIRECTORY_SEPARATOR, '.');
+			//获取动作
+			if ($request) {
+				$action = array_shift($request);
 			}
 		}
 		//检查动作名是否安全-防注入
 		if (!preg_match("/^[A-Za-z0-9_]+$/", $controller)) {
 			self::$errorMsg = array(
 				'code' => '400',
-				'msg' => 'controller error!'
+				'msg' => 'Controller not allowed!'
 			);
 			return false;
 		}
 		if (!preg_match("/^[A-Za-z0-9_]+$/", $action)) {
 			self::$errorMsg = array(
 				'code' => '400',
-				'msg' => 'action error!'
+				'msg' => 'Action not allowed!'
 			);
 			return false;
 		}
@@ -244,21 +258,26 @@ class Cellular {
 		}
 		self::$errorMsg = array(
 			'code' => '404',
-			'msg' => 'page not !'
+			'msg' => 'Page not Found!'
 		);
 		return false;
 	}
 
 	private static function error($code, $msg = null)
 	{
+		$request = self::getFile('error/400.html');
+		$var = array('<header></header>','<p></p>');
 		switch ($code) {
 			case '400':
-				self::loadFile('error/400.html');
+				$value = array('<header>400</header>','<p>'.$msg.'</p>');
+				$request = str_replace($var, $value, $request);
 				break;
 			case '404':
-				self::loadFile('error/404.html');
+				$value = array('<header>404</header>','<p>'.$msg.'</p>');
+				$request = str_replace($var, $value, $request);
 				break;
 		}
+		echo $request;
 	}
 
 }
