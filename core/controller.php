@@ -52,7 +52,7 @@ class Controller extends Base {
 	protected function display($name)
 	{
 		if ($this->viewData) extract($this->viewData);
-		$file = Cellular::$appStruct['view']. '/' .$name.'.html';
+		$file = Cellular::$appStruct['view']. '/' .$name.'.php';
 		ob_start(); //开启缓冲区
 		Cellular::loadFile($file);
 		$this->viewCache = ob_get_contents();

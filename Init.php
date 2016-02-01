@@ -177,7 +177,7 @@ class Cellular {
 		//过滤脚本目录
 		$requestURI = str_replace(substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/')), '', $requestURI);
 		//请求资源检查
-		if (!preg_match("/^[A-Za-z0-9_.\/%&#@]+$/", $requestURI)) {
+		if (!preg_match("/^[A-Za-z0-9_.\/%&#@]+$/", $requestURI) && !empty($requestURI)) {
 			self::$errorMsg = array(
 				'code' => '400',
 				'msg' => 'URI not allowed!'
@@ -277,7 +277,7 @@ class Cellular {
 				$request = str_replace($var, $value, $request);
 				break;
 		}
-		echo $request;
+		die($request);
 	}
 
 }
