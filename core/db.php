@@ -12,6 +12,7 @@ class DB {
   private $table;
   private $field;
   private $param; # sql parameter
+  private $stmt; # sql statement
   private $where;
   private $orders;
   private $limit;
@@ -73,15 +74,6 @@ class DB {
     return $this;
   }
 
-  # 待删 条件放在 where 中即可
-  public function field($param) {
-    if (is_null($param)) {
-      die('field param is null');
-    }
-    $this->field = $param;
-    return $this;
-  }
-
   /**
    * WHERE 条件子句
    */
@@ -94,12 +86,30 @@ class DB {
   }
 
   public function group($param) {
-
+    if (is_null($param)) {
+      die('group param is null');
+    }
+    if (is_array($param)) {
+      foreach ($param as $value) {
+        $this->group = ',' . $value;
+      }
+      $this->group = 'GROUP BY ' . substr($this->group, 1);
+    }
+    if (is_string($param)) {
+      $this->group = 'GROUP BY ' . $param;
+    }
+    return $this;
   }
 
   public function order($param) {
     if (is_null($param)) {
       die('order param is null');
+    }
+    if (is_array($param)) {
+      foreach ($param as $key=>$value) {
+        $this->order .= ',' . $key . ' ' . $value;
+      }
+      $this->order = 'ORDER BY' . substr($this->order, 1);
     }
     if (is_string($param)) {
       $this->order = 'ORDER BY ' . $param;
@@ -120,7 +130,15 @@ class DB {
   }
 
   public function query($sql) {
+    if (is_null($this->param)) {
 
+    } else {
+      $this->stmt = prepare($sql);
+      foreach ($this->param as $key => $value) {
+        $this->stmt->bindParam(':' . $key, $value);
+      }
+      return $this->stmt->execute();
+    }
   }
 
   /**
@@ -136,7 +154,7 @@ class DB {
    * 查询一条记录
    */
   public function first() {
-    # PDO - FetchColumn
+    # PDO - fetch()
   }
 
   public function select($param = null) {
