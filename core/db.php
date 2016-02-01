@@ -5,6 +5,7 @@
  * @version 1.0 2016-01-28
  */
 namespace core;
+use Cellular;
 class DB {
 
   private $pdo;
@@ -14,7 +15,7 @@ class DB {
   private $param; # sql parameter
   private $stmt; # sql statement
   private $where;
-  private $orders;
+  private $order;
   private $limit;
   private $sql;
   protected $exp = [
@@ -39,14 +40,14 @@ class DB {
   /**
    * 构造函数
    */
-  private function __construct() {
+  function __construct() {
     $this->connect();
   }
 
   /**
    * 析构函数
    */
-  private function __destruct() {
+  function __destruct() {
     return time();
     //return $this->pdo->query($this->sql);
     $this->pdo = null;
@@ -56,12 +57,12 @@ class DB {
    * 连接数据库
    */
   private function connect() {
-    $config = parse_ini_file('../config/mysql.ini');
+    $config = Cellular::loadFile('config/mysql.php');
     $this->prefix = $config['prefix'];
 		$dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['database'];
     try {
       $this->pdo = new \PDO($dsn, $config['username'], $config['password']);
-    } catch (PDOException $e) {
+    } catch (\PDOException $e) {
       die('PDOException: ' . $e->getMessage());
     }
   }
