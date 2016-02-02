@@ -67,6 +67,14 @@ class Controller extends Base {
 		return $this->viewCache;
 	}
 
+	/**
+	 * 载入配置信息
+	 */
+	protected function config($file)
+	{
+		return Cellular::loadFile($file);
+	}
+
 }
 
 ?>
