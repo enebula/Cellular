@@ -5,6 +5,7 @@
  * @version 1.0 2016-01-28
  */
 namespace core;
+use Cellular;
 class DB {
 
   private $pdo;
@@ -12,8 +13,9 @@ class DB {
   private $table;
   private $field;
   private $param; # sql parameter
+  private $stmt; # sql statement
   private $where;
-  private $orders;
+  private $order;
   private $limit;
   private $sql;
   protected $exp = [
@@ -38,14 +40,14 @@ class DB {
   /**
    * 构造函数
    */
-  private function __construct() {
+  function __construct() {
     $this->connect();
   }
 
   /**
    * 析构函数
    */
-  private function __destruct() {
+  function __destruct() {
     return time();
     //return $this->pdo->query($this->sql);
     $this->pdo = null;
@@ -55,12 +57,12 @@ class DB {
    * 连接数据库
    */
   private function connect() {
-    $config = parse_ini_file('../config/mysql.ini');
+    $config = Cellular::loadFile('config/mysql.php');
     $this->prefix = $config['prefix'];
 		$dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['database'];
     try {
       $this->pdo = new \PDO($dsn, $config['username'], $config['password']);
-    } catch (PDOException $e) {
+    } catch (\PDOException $e) {
       die('PDOException: ' . $e->getMessage());
     }
   }
@@ -70,15 +72,6 @@ class DB {
       die('table param is null');
     }
     $this->table = $param;
-    return $this;
-  }
-
-  # 待删 条件放在 where 中即可
-  public function field($param) {
-    if (is_null($param)) {
-      die('field param is null');
-    }
-    $this->field = $param;
     return $this;
   }
 
@@ -94,12 +87,30 @@ class DB {
   }
 
   public function group($param) {
-
+    if (is_null($param)) {
+      die('group param is null');
+    }
+    if (is_array($param)) {
+      foreach ($param as $value) {
+        $this->group = ',' . $value;
+      }
+      $this->group = 'GROUP BY ' . substr($this->group, 1);
+    }
+    if (is_string($param)) {
+      $this->group = 'GROUP BY ' . $param;
+    }
+    return $this;
   }
 
   public function order($param) {
     if (is_null($param)) {
       die('order param is null');
+    }
+    if (is_array($param)) {
+      foreach ($param as $key=>$value) {
+        $this->order .= ',' . $key . ' ' . $value;
+      }
+      $this->order = 'ORDER BY' . substr($this->order, 1);
     }
     if (is_string($param)) {
       $this->order = 'ORDER BY ' . $param;
@@ -120,7 +131,20 @@ class DB {
   }
 
   public function query($sql) {
-
+    if (is_null($this->param)) {
+      try {
+        $this->stmt = $this->pdo->query($sql, \PDO::FETCH_ASSOC);
+      } catch (\PDOException $e) {
+        die('PDOException: ' . $e->getMessage());
+      }
+      return $this->stmt->fetchAll();
+    } else {
+      $this->stmt = $this->pdo->prepare($sql);
+      foreach ($this->param as $key => $value) {
+        $this->stmt->bindParam(':' . $key, $value);
+      }
+      return $this->stmt->execute()->fetchAll();
+    }
   }
 
   /**
@@ -136,13 +160,13 @@ class DB {
    * 查询一条记录
    */
   public function first() {
-    # PDO - FetchColumn
+    # PDO - fetch()
   }
 
   public function select($param = null) {
     if (!is_null($param)) {
       try {
-        return $this->pdo->query($param)->fetchAll();
+        return $this->query($param);
       } catch (PDOException $e) {
         die('PDOException: ' . $e.getMessage());
       }
@@ -185,7 +209,7 @@ class DB {
     }
     echo $sql . '<br>';
     try {
-      return $this->pdo->query($sql)->fetchAll();
+      return $this->query($sql);
     } catch (PDOException $e) {
       die('PDOException: ' . $e->getMessage());
     }
@@ -244,6 +268,23 @@ class DB {
   public function bind($param) {
     foreach ($param as $key=>$val) {
       $this->param[$key] = $val;
+    }
+  }
+
+  /**
+   * 执行事务
+   */
+  public function trans() {
+    try {
+      #$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $this->pdo->beginTransaction();
+      $this->exec();
+      $this->exec();
+      $this->exec();
+      $this->pdo->commit();
+    } catch (Exception $e) {
+        $this->pdo->rollBack();
+        die('Exception: ' . $e->getMessage());
     }
   }
 
