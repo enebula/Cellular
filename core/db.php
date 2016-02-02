@@ -132,13 +132,18 @@ class DB {
 
   public function query($sql) {
     if (is_null($this->param)) {
-
+      try {
+        $this->stmt = $this->pdo->query($sql, \PDO::FETCH_ASSOC);
+      } catch (\PDOException $e) {
+        die('PDOException: ' . $e->getMessage());
+      }
+      return $this->stmt->fetchAll();
     } else {
-      $this->stmt = prepare($sql);
+      $this->stmt = $this->pdo->prepare($sql);
       foreach ($this->param as $key => $value) {
         $this->stmt->bindParam(':' . $key, $value);
       }
-      return $this->stmt->execute();
+      return $this->stmt->execute()->fetchAll();
     }
   }
 
@@ -161,7 +166,7 @@ class DB {
   public function select($param = null) {
     if (!is_null($param)) {
       try {
-        return $this->pdo->query($param)->fetchAll();
+        return $this->query($param);
       } catch (PDOException $e) {
         die('PDOException: ' . $e.getMessage());
       }
@@ -204,7 +209,7 @@ class DB {
     }
     echo $sql . '<br>';
     try {
-      return $this->pdo->query($sql)->fetchAll();
+      return $this->query($sql);
     } catch (PDOException $e) {
       die('PDOException: ' . $e->getMessage());
     }
@@ -263,6 +268,23 @@ class DB {
   public function bind($param) {
     foreach ($param as $key=>$val) {
       $this->param[$key] = $val;
+    }
+  }
+
+  /**
+   * 执行事务
+   */
+  public function trans() {
+    try {
+      #$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $this->pdo->beginTransaction();
+      $this->exec();
+      $this->exec();
+      $this->exec();
+      $this->pdo->commit();
+    } catch (Exception $e) {
+        $this->pdo->rollBack();
+        die('Exception: ' . $e->getMessage());
     }
   }
 
