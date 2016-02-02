@@ -83,6 +83,19 @@ class DB {
       die('where param is null');
     }
     $this->where = $param;
+    if (is_string($this->where)) {
+      # where is string
+      $this->where = $param;
+    } elseif (is_array($this->where)) {
+      # where is array
+      //$sql .= implode(',', array_keys($this->where));
+      $str = null;
+      foreach ($this->where as $key=>$value) {
+        $str .= ' AND `' . $key . '`=\'' . $value . '\'';
+      }
+      $this->where = substr($str, 4);
+    }
+    $this->where = ' WHERE ' . $this->where;
     return $this;
   }
 
@@ -131,6 +144,7 @@ class DB {
   }
 
   public function query($sql) {
+    echo $sql . '<br>';
     if (is_null($this->param)) {
       try {
         $this->stmt = $this->pdo->query($sql, \PDO::FETCH_ASSOC);
@@ -185,29 +199,13 @@ class DB {
     if (is_null($this->table)) {
       die('table is null');
     }
-    $sql .= ' FROM `' . $this->prefix . $this->table . '`';
-    if (!is_null($this->where)) {
-      $sql .= ' WHERE ';
-      if (is_string($this->where)) {
-        # where is string
-        $sql .= $this->where;
-      } elseif (is_array($this->where)) {
-        # where is array
-        //$sql .= implode(',', array_keys($this->where));
-        $str = null;
-        foreach ($this->where as $key=>$value) {
-          $str .= ' AND ' . $key . '=\'' . $value . '\'';
-        }
-        $sql .= substr($str, 4);
-      }
-    }
+    $sql .= ' FROM `' . $this->prefix . $this->table . '`' . $this->where;
     if (!is_null($this->order)) {
       $sql .= ' ' . $this->order;
     }
     if (!is_null($this->limit)) {
       $sql .= ' LIMIT ' . $this->limit;
     }
-    echo $sql . '<br>';
     try {
       return $this->query($sql);
     } catch (PDOException $e) {
@@ -218,21 +216,35 @@ class DB {
   /**
    * 插入记录
    */
-  public function insert($query, $param) {
+  public function insert($param) {
     if (is_null($this->table)) {
       die('table is null');
     }
-    $sql = 'INSERT INTO ' . $this->table;
+    $key = null;
+    $value = null;
+    foreach ($param as $k => $v) {
+      $key .= ',`' . $k . '`';
+      $value .= ',\'' . $v . '\'';
+    }
+    $sql = 'INSERT INTO `' . $this->prefix . $this->table . '` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
+    echo $sql.'<br>';
+    return $this->pdo->exec($sql);
   }
 
   /**
    * 更新记录
    */
-  public function update($query, $param) {
+  public function update($param) {
     if (is_null($this->table)) {
       die('table is null');
     }
-    $sql = 'UPDATE ' . $this->table;
+    $sql = 'UPDATE `' . $this->prefix . $this->table . '` SET ';
+    foreach ($param as $k => $v) {
+      $sql .= '`' . $k . '`=\'' . $v . '\'';
+    }
+    if ($this->where)
+    echo $sql.'<br>';
+    return $this->pdo->exec($sql);
   }
 
   /**
@@ -243,6 +255,7 @@ class DB {
       die('table is null');
     }
     $sql = 'DELETE FROM `' . $this->prefix . $this->table . '`';
+    echo $sql.'<br>';
     try {
       return $this->pdo->exec($sql);
     } catch (PDOException $e) {
@@ -256,10 +269,6 @@ class DB {
 
   public function distinct() {
 
-  }
-
-  public function statement($query, $param = null) {
-    return $this->pdo->PDOStatement($query);
   }
 
   /**
