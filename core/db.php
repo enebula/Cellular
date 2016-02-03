@@ -18,22 +18,6 @@ class DB {
   private $order;
   private $limit;
   private $sql;
-  protected $exp = [
-    'eq'=>'=',
-    'neq'=>'<>',
-    'gt'=>'>',
-    'egt'=>'>=',
-    'lt'=>'<',
-    'elt'=>'<=',
-    'like'=>'LIKE',
-    'notlike'=>'NOT LIKE',
-    'in'=>'IN',
-    'notin'=>'NOT IN',
-    'not in'=>'NOT IN',
-    'between'=>'BETWEEN',
-    'not between'=>'NOT BETWEEN',
-    'notbetween'=>'NOT BETWEEN'
-  ];
   protected $query = 0; # 查询次数
   protected $execute = 0; # 执行次数
 
@@ -97,6 +81,34 @@ class DB {
     }
     $this->where = ' WHERE ' . $this->where;
     return $this;
+  }
+
+  public function orWhere($param) {
+
+  }
+
+  public function between($param) {
+
+  }
+
+  public function notBetween($param) {
+
+  }
+
+  public function in($param) {
+
+  }
+
+  public function notIn($param) {
+
+  }
+
+  public function isNull($param) {
+
+  }
+
+  public function isNotNull($param) {
+
   }
 
   public function group($param) {
@@ -190,7 +202,7 @@ class DB {
       $sql .= $param;
     } elseif (is_array($param)) {
       # field is array
-      $sql .= '`' . implode('`,`', $this->field) . '`';
+      $sql .= '`' . implode('`,`', $param) . '`';
     }
     $sql .= ' FROM `' . $this->prefix . $this->table . '`';
     if (!is_null($this->where)) {
