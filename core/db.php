@@ -178,28 +178,24 @@ class DB {
   }
 
   public function select($param = null) {
-    if (!is_null($param)) {
-      try {
-        return $this->query($param);
-      } catch (PDOException $e) {
-        die('PDOException: ' . $e.getMessage());
-      }
-    }
-    $sql = 'SELECT ';
-    if (is_null($this->field)) {
-      # field is null select all
-      $sql .= '*';
-    } elseif (is_string($this->field)) {
-      # field is string select field
-      $sql .= $this->field;
-    } elseif (is_array($this->field)) {
-      # field is array
-      $sql .= '`' . implode('`,`', $this->field) . '`';
-    }
     if (is_null($this->table)) {
       die('table is null');
     }
-    $sql .= ' FROM `' . $this->prefix . $this->table . '`' . $this->where;
+    $sql = 'SELECT ';
+    if (is_null($param)) {
+      # field is null select all
+      $sql .= '*';
+    } elseif (is_string($param)) {
+      # field is string
+      $sql .= $param;
+    } elseif (is_array($param)) {
+      # field is array
+      $sql .= '`' . implode('`,`', $this->field) . '`';
+    }
+    $sql .= ' FROM `' . $this->prefix . $this->table . '`';
+    if (!is_null($this->where)) {
+      $sql .= ' ' . $this->where;
+    }
     if (!is_null($this->order)) {
       $sql .= ' ' . $this->order;
     }
@@ -256,6 +252,22 @@ class DB {
     }
     $sql = 'DELETE FROM `' . $this->prefix . $this->table . '`';
     echo $sql.'<br>';
+    try {
+      return $this->pdo->exec($sql);
+    } catch (PDOException $e) {
+      die('PDOException: ' . $e->getMessage());
+    }
+  }
+
+  /**
+   * 清空表
+   * 快速清空数据库内指定表内容的 SQL 语句，不保留日志，无法恢复数据，速度也是最快的，比 DELETE 删除方式快非常多。
+   */
+  public function clear() {
+    if (is_null($this->table)) {
+      dle('table is null');
+    }
+    $sql = 'TRUNCATE TABLE `' . $this->prefix . $this->table . '`';
     try {
       return $this->pdo->exec($sql);
     } catch (PDOException $e) {
