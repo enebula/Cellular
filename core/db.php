@@ -62,26 +62,60 @@ class DB {
   /**
    * WHERE 条件子句
    */
-  public function where($param) {
-    if (is_null($param)) {
-      die('where param is null');
+
+    public function where2() {
+        $num = func_num_args();
+        $var = func_get_args();
+        switch ($num) {
+            case 1:
+                if (is_string($var[0])) {
+                    //字符串条件
+                    $this->where[] = $var[0];
+                } else {
+                    //回调函数
+                    $var[0]($this);
+                }
+                break;
+            case 2:
+                //等于条件
+                $this->where[] = array($var[0], '=', $var[1]);
+                break;
+            case 3:
+                //其它条件
+                $this->where[] = array($var[0], $var[1], $var[2]);
+                break;
+        }
+        return $this;
     }
-    $this->where = $param;
-    if (is_string($this->where)) {
-      # where is string
-      $this->where = $param;
-    } elseif (is_array($this->where)) {
-      # where is array
-      //$sql .= implode(',', array_keys($this->where));
-      $str = null;
-      foreach ($this->where as $key=>$value) {
-        $str .= ' AND `' . $key . '`=\'' . $value . '\'';
+
+    /**
+     * WHERE 条件子句
+     */
+
+    public function where() {
+      if (is_null($param)) {
+        die('where param is null');
       }
-      $this->where = substr($str, 4);
+      $this->where = $param;
+      if (is_string($this->where)) {
+        # where is string
+        $this->where = $param;
+      } elseif (is_array($this->where)) {
+        # where is array
+        //$sql .= implode(',', array_keys($this->where));
+        $str = null;
+        foreach ($this->where as $key=>$value) {
+          $str .= ' AND `' . $key . '`=\'' . $value . '\'';
+        }
+        $this->where = substr($str, 4);
+      }
+      $this->where = ' WHERE ' . $this->where;
+          return $this;
+      }
+
+    public function test() {
+        print_r($this->where);
     }
-    $this->where = ' WHERE ' . $this->where;
-    return $this;
-  }
 
   public function orWhere($param) {
 
