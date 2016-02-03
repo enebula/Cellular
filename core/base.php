@@ -10,6 +10,7 @@
  */
 
 namespace core;
+use Cellular;
 
 class Base {
 
@@ -23,10 +24,19 @@ class Base {
         if (null === $this->class) $this->class = new \stdClass();
         $name = strtr($className, '.', '_');
         if (!isset($this->class->$name)) {
-            $this->class->$name = \Cellular::loadClass($className, $param);
+            $this->class->$name = Cellular::loadClass($className, $param);
         }
         return $this->class->$name;
     }
+
+    /**
+	 * 载入配置信息
+	 */
+	protected function config($name)
+	{
+        $path = Cellular::$appStruct['config'].DIRECTORY_SEPARATOR.$name.'.php';
+		return Cellular::loadFile($path);
+	}
 
 }
 

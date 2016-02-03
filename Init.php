@@ -27,7 +27,8 @@ class Cellular {
 	public static $appStruct = array(
 		'controller' => 'controller',
 		'model' => 'model',
-		'view' => 'view'
+		'view' => 'view',
+		'config' => 'config'
 	);
 
 	/**
