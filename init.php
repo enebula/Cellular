@@ -101,7 +101,7 @@ class Cellular {
 	public static function getFilePath($file)
 	{
 		//检查文件名是否安全-防注入
-		if (preg_match("/^[A-Za-z0-9_\/.]+$/", $file)) {
+		if (preg_match("/^[A-Za-z0-9_\-\/.]+$/", $file)) {
 			//解析文件路径
 			$path = self::$appPath.DIRECTORY_SEPARATOR.self::$appName.DIRECTORY_SEPARATOR.$file;
 			if (is_file($path)) {
@@ -178,7 +178,7 @@ class Cellular {
 		//过滤脚本目录
 		$requestURI = str_replace(substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/')), '', $requestURI);
 		//请求资源检查
-		if (!preg_match("/^[A-Za-z0-9_.\/%&#@]+$/", $requestURI) && !empty($requestURI)) {
+		if (!preg_match("/^[A-Za-z0-9_\-\/.%&#@]+$/", $requestURI) && !empty($requestURI)) {
 			self::$errorMsg = array(
 				'code' => '400',
 				'msg' => 'URI not allowed!'
