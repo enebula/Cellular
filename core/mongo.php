@@ -28,12 +28,13 @@ class Mongo {
       $config = Cellular::loadFile('config/mongo.php');
       $conn = 'mongodb://';
       if (!is_null($config['username']) && !is_null($config['password']) {
-        $conn .= $config['username'] . ':' . $config['password'] . '@';
+        $conn .= '${' . $config['username'] . '}:${' . $config['password'] . '}@';
       }
       $conn .= $config['host'] . ':' . $config['port'];
       if (!is_null($config['database'])) {
         $conn .= '/' . $config['database'];
       }
+      # new MongoClient('mongodb://host:port', ['username'=>$username,'password'=>$password], ['db'=>'$database']);
       $mongo = new MongoClient($conn);
   		return $mongo;
     }
