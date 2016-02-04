@@ -26,7 +26,7 @@ class DB {
    * 构造函数
    */
   function __construct() {
-    //$this->connect();
+    $this->connect();
   }
 
   /**
@@ -56,38 +56,15 @@ class DB {
     if (is_null($param)) {
       die('table param is null');
     }
+    $this->where = null;
     $this->table = $param;
     return $this;
   }
 
-  /**
-   * WHERE 条件子句(等待删除)
-   */
-
-  public function where() {
-    if (is_null($param)) {
-      die('where param is null');
-    }
-    $this->where = $param;
-    if (is_string($this->where)) {
-      # where is string
-      $this->where = $param;
-    } elseif (is_array($this->where)) {
-      # where is array
-      //$sql .= implode(',', array_keys($this->where));
-      $str = null;
-      foreach ($this->where as $key=>$value) {
-        $str .= ' AND `' . $key . '`=\'' . $value . '\'';
-      }
-      $this->where = substr($str, 4);
-    }
-    $this->where = ' WHERE ' . $this->where;
-        return $this;
-    }
-
     public function test()
     {
-        print_r($this->where);
+        echo $this->getWhere();
+        //print_r($this->where);
     }
 
   /**
@@ -107,27 +84,90 @@ class DB {
     private function setChildWhere($type)
     {
         $this->where[][$type] = $this->whereChild;
+        $this->whereChild = null;
     }
 
     /**
     * 生成WHERE 条件子句
     */
-    private function getWhere()
+    private function getWhere($value = null)
     {
-        return null;
+        $sql = '';
+        $value = is_null($value) ? $this->where : $value;
+        foreach ($value as $k => $val) {
+            $key = key($val);
+            $param = $val[$key];
+            $exp = array(
+               'and' => 'AND',
+               'or' => 'OR',
+            );
+            if (0 !== $k) {
+                $sql .= isset($exp[$key]) ? $exp[$key] : 'AND';
+            }
+            if (is_array($param)) {
+                if (is_array($param[0])) {
+                    switch ($key) {
+                        case 'and':
+                            $sql .= ' ('. $this->getWhere($param) .') ';
+                            break;
+                        case 'or':
+                            $sql .= ' ('. $this->getWhere($param) .') ';
+                            break;
+                    }
+                } else {
+                    switch ($key) {
+                        case 'and':
+                            $sql .= ' `'. $param[0] .'` '. $param[1] .' \''. $param[2] . '\' ';
+                            break;
+                        case 'or':
+                            $sql .= ' `'. $param[0] .'` '. $param[1] .' \''. $param[2] . '\' ';
+                            break;
+                        case 'like':
+                            $keyword = $param[2] == 'center' ? '%'. $param[1] .'%' : ($param[2] == 'left' ? '%'. $param[1] : $param[1] .'%');
+                            $sql .= ' `'. $param[0] .'` LIKE \''. $keyword .'\' ';
+                            break;
+                        case 'notlike':
+                            $keyword = $param[2] == 'center' ? '%'. $param[1] .'%' : ($param[2] == 'left' ? '%'. $param[1] : $param[1] .'%');
+                            $sql .= ' `'. $param[0] .'` NOT LIKE \''. $keyword .'\' ';
+                            break;
+                        case 'between':
+                            $sql .= ' `'. $param[0] .'` BETWEEN \''. $param[1] .'\' AND \''. $param[2] .'\' ';
+                            break;
+                        case 'notbetween':
+                            $sql .= ' `'. $param[0] .'` NOT BETWEEN \''. $param[1] .'\' AND \''. $param[2] .'\' ';
+                            break;
+                        case 'null':
+                            $sql .= ' `'. $param[0] .'` IS NULL ';
+                            break;
+                        case 'notnull':
+                            $sql .= ' `'. $param[0] .'` IS NOT NULL ';
+                            break;
+                        case 'in':
+                            $sql .= ' `'. $param[0] .'` IN(\''. str_replace( ',', '\',\'', $param[1]) .'\')';
+                            break;
+                        case 'notin':
+                            $sql .= ' `'. $param[0] .'` NOT IN(\''. str_replace( ',', '\',\'', $param[1]) .'\')';
+                            break;
+                    }
+                }
+            } elseif(is_string($param)) {
+                $arr = array('='=>'` = \'', '>'=>'` > \'', '<'=>'` < \'', '>='=>'` >= \'', '=<'=>'` =< \'', '<>'=>'` <> \'');
+                $sql .= ' `'. strtr($param, $arr) .'\' ';
+            }
+        }
+        return trim($sql);
     }
 
     /**
      * WHERE 条件子句
      */
-    public function where2() {
+    public function where() {
         $num = func_num_args();
         $var = func_get_args();
         if (is_callable($var[0])) {
             $this->whereChild = array(); //'and';
             $var[0]($this);
-            $this->setChildWhere('add');
-            $this->whereChild = null;
+            $this->setChildWhere('and');
         } else {
             $value = array();
             switch ($num) {
@@ -144,7 +184,7 @@ class DB {
                     $value = array($var[0], $var[1], $var[2]);
                     break;
             }
-            $this->setWhere($value,'add');
+            $this->setWhere($value,'and');
         }
         return $this;
     }
@@ -152,11 +192,11 @@ class DB {
   public function orWhere() {
       $num = func_num_args();
       $var = func_get_args();
+      if ($num == 0) return $this;
       if (is_callable($var[0])) {
           $this->whereChild = array();
           $var[0]($this);
           $this->setChildWhere('or');
-          $this->whereChild = null;
       } else {
           $value = array();
           switch ($num) {
@@ -180,56 +220,96 @@ class DB {
 
   public function like()
   {
-
-  }
-
-  public function leftLike()
-  {
-
-  }
-
-  public function rightLike()
-  {
-
+      $num = func_num_args();
+      $var = func_get_args();
+      $value = array();
+      switch ($num) {
+          case 1:
+              //字符串条件
+              $value = $var[0];
+              break;
+          case 2:
+              //全匹配
+              $value = array($var[0], $var[1], 'center');
+              break;
+          case 3:
+              //左匹配或右匹配
+              $var[2] = $var[2] == 'left' ? 'left' : 'right';
+              $value = array($var[0], $var[1], $var[2]);
+              break;
+      }
+      $this->setWhere($value, 'like');
+      return $this;
   }
 
   public function notLike()
   {
-
+      $num = func_num_args();
+      $var = func_get_args();
+      $value = array();
+      switch ($num) {
+          case 1:
+              //字符串条件
+              $value = $var[0];
+              break;
+          case 2:
+              //全匹配
+              $value = array($var[0], $var[1], 'center');
+              break;
+          case 3:
+              //左匹配或右匹配
+              $var[2] = $var[2] == 'left' ? 'left' : 'right';
+              $value = array($var[0], $var[1], $var[2]);
+              break;
+      }
+      $this->setWhere($value, 'notlike');
+      return $this;
   }
 
-  public function notLeftLike()
-  {
-
+  public function between($field, $min, $max) {
+      $value = array($field, $min, $max);
+      $this->setWhere($value, 'between');
+      return $this;
   }
 
-  public function notRightLike()
-  {
-
+  public function notBetween($field, $min, $max) {
+      $value = array($field, $min, $max);
+      $this->setWhere($value, 'notbetween');
+      return $this;
   }
 
-  public function between($param) {
-
+  public function isNull($field) {
+      $value = array($field);
+      $this->setWhere($value, 'null');
+      return $this;
   }
 
-  public function notBetween($param) {
-
+  public function isNotNull($field) {
+      $value = array($field);
+      $this->setWhere($value, 'notnull');
+      return $this;
   }
 
-  public function in($param) {
-
+  public function in($field, $param) {
+      $value = array($field, $param);
+      if (is_array($param)) {
+          $var = null;
+          foreach ($param as $val) $var .= ','.$val;
+          $valeu[1] = substr($var, 1);
+      }
+      $this->setWhere($value, 'in');
+      return $this;
   }
 
-  public function notIn($param) {
-
-  }
-
-  public function isNull($param) {
-
-  }
-
-  public function isNotNull($param) {
-
+  public function notIn($field, $param) {
+      $value = array($field, $param);
+      if (is_array($param)) {
+          $var = null;
+          foreach ($param as $val) $var .= ','.$val;
+          $value[1] = substr($var, 1);
+      }
+      $this->setWhere($value, 'notin');
+      return $this;
   }
 
   public function group($param) {
@@ -327,7 +407,7 @@ class DB {
     }
     $sql .= ' FROM `' . $this->prefix . $this->table . '`';
     if (!is_null($this->where)) {
-      $sql .= ' ' . $this->where;
+      $sql .= ' WHERE ' . $this->getWhere();
     }
     if (!is_null($this->order)) {
       $sql .= ' ' . $this->order;
