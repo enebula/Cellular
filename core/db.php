@@ -383,7 +383,7 @@ class DB extends Base {
             $this->stmt = $this->pdo->prepare($sql);
             foreach ($this->param as $key => $value) {
                 $this->stmt->bindParam(':' . $key, $value);
-            }
+            }echo ':' . $this->stmt->debugDumpParams() . '<br>';
             return $this->stmt->execute()->fetchAll();
         }
     }
@@ -444,15 +444,23 @@ class DB extends Base {
         if (is_null($this->table)) {
             die('table is null');
         }
+        if (is_null($param)) {
+            die('insert param is null');
+        }
         $key = null;
         $value = null;
         foreach ($param as $k => $v) {
             $key.= ',`' . $k . '`';
-            $value.= ',\'' . $v . '\'';
+            $value.= ',:' . $k;
         }
         $sql = 'INSERT INTO `' . $this->prefix . $this->table . '` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
         echo $sql . '<br>';
-        return $this->pdo->exec($sql);
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($param as $k => $v) {
+            $stmt->bindParam(':' . $k, $v);
+        }
+        echo $stmt->debugDumpParams().'<br>';
+        return $stmt->execute();
     }
 
     /**
@@ -462,22 +470,48 @@ class DB extends Base {
         if (is_null($this->table)) {
             die('table is null');
         }
+        if (is_null($param)) {
+            die('update param is null');
+        }
         $sql = 'UPDATE `' . $this->prefix . $this->table . '` SET ';
         foreach ($param as $k => $v) {
-            $sql.= '`' . $k . '`=\'' . $v . '\'';
+            $sql.= '`' . $k . '`=:' . $k . '';
         }
-        if ($this->where) echo $sql . '<br>';
-        return $this->pdo->exec($sql);
+        if (!is_null($this->where)) {
+            $sql.= ' WHERE ' . $this->getWhere();
+        }
+        if (!is_null($this->order)) {
+            $sql.= ' ORDER BY ' . $this->order;
+        }
+        if (!is_null($this->limit)) {
+            $sql.= ' LIMIT ' . $this->limit;
+        }
+        echo $sql . '<br>';
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($param as $k => $v) {
+            $stmt->bindParam(':' . $k, $v);
+        }
+        echo $stmt->debugDumpParams().'<br>';
+        return $stmt->execute();
     }
 
     /**
      * 删除记录
      */
-    public function delete($param = null) {
+    public function delete() {
         if (is_null($this->table)) {
             die('table is null');
         }
         $sql = 'DELETE FROM `' . $this->prefix . $this->table . '`';
+        if (!is_null($this->where)) {
+            $sql.= ' WHERE ' . $this->getWhere();
+        }
+        if (!is_null($this->order)) {
+            $sql.= ' ORDER BY ' . $this->order;
+        }
+        if (!is_null($this->limit)) {
+            $sql.= ' LIMIT ' . $this->limit;
+        }
         echo $sql . '<br>';
         try {
             return $this->pdo->exec($sql);
