@@ -451,16 +451,14 @@ class DB extends Base {
         $value = null;
         foreach ($param as $k => $v) {
             $key.= ',`' . $k . '`';
-            $value.= ',:' . $k;
+            $value.= ',?';
         }
+        $val = array_values($param);
+        unset($param);
         $sql = 'INSERT INTO `' . $this->prefix . $this->table . '` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
         echo $sql . '<br>';
         $stmt = $this->pdo->prepare($sql);
-        foreach ($param as $k => $v) {
-            $stmt->bindParam(':' . $k, $v);
-        }
-        echo $stmt->debugDumpParams().'<br>';
-        return $stmt->execute();
+        return $stmt->execute($val);
     }
 
     /**
@@ -475,8 +473,10 @@ class DB extends Base {
         }
         $sql = 'UPDATE `' . $this->prefix . $this->table . '` SET ';
         foreach ($param as $k => $v) {
-            $sql.= '`' . $k . '`=:' . $k . '';
+            $sql.= '`' . $k . '`=?';
         }
+        $val = array_values($param);
+        unset($param);
         if (!is_null($this->where)) {
             $sql.= ' WHERE ' . $this->getWhere();
         }
@@ -488,11 +488,7 @@ class DB extends Base {
         }
         echo $sql . '<br>';
         $stmt = $this->pdo->prepare($sql);
-        foreach ($param as $k => $v) {
-            $stmt->bindParam(':' . $k, $v);
-        }
-        echo $stmt->debugDumpParams().'<br>';
-        return $stmt->execute();
+        return $stmt->execute($val);
     }
 
     /**
