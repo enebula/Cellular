@@ -368,10 +368,14 @@ class DB extends Base {
     }
 
     public function group($param) {
-        if (is_null($param)) {
+        $num = func_num_args();
+        $var = func_get_args();
+        if ($num < 1) {
             die('group param is null');
+        } else {
+            $param = ($num > 1) ? implode(',', $var) : $var[0];
+            $this->group = $this->formatField($param);
         }
-        $this->group = $this->formatField($param);
         return $this;
     }
 
