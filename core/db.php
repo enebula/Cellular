@@ -591,6 +591,7 @@ class DB extends Base {
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT '.$this->limit;
         }
+        echo $sql . '<br>';
         return $this->query($sql);
     }
 
