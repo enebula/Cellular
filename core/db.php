@@ -87,7 +87,7 @@ class DB extends Base {
         $this->group = null;
         $this->order = null;
         $this->limit = null;
-        $this->table = $this->prefix.$param;
+        $this->table = $this->prefix . $param;
         return $this;
     }
 
@@ -558,7 +558,7 @@ class DB extends Base {
         if (is_null($this->table)) {
             dle('table is null');
         }
-        $sql = 'TRUNCATE TABLE `' . $this->prefix . $this->table . '`';
+        $sql = 'TRUNCATE TABLE `' . $this->table . '`';
         try {
             return $this->pdo->exec($sql);
         }
@@ -571,7 +571,27 @@ class DB extends Base {
         return $this->pdo->lastInsertId();
     }
 
-    public function distinct() {
+    /**
+     * 去重查询
+     */
+    public function distinct($param) {
+        if (is_null($this->table)) {
+            dle('table is null');
+        }
+        if (is_null($param)) {
+            dle('param is null');
+        }
+        $sql = 'SELECT DISTINCT(' . $param . ') FROM `' . $this->table . '`';
+        if (!is_null($this->where)) {
+            $sql .= ' WHERE '.$this->getWhere();
+        }
+        if (!is_null($this->order)) {
+            $sql .= ' ORDER BY '.implode(',', $this->order);
+        }
+        if (!is_null($this->limit)) {
+            $sql .= ' LIMIT '.$this->limit;
+        }
+        return $this->query($sql);
     }
 
     /**
