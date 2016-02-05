@@ -503,8 +503,11 @@ class DB extends Base {
         if (!is_null($this->where)) {
             $sql.= ' WHERE ' . $this->getWhere();
         }
+        if (!is_null($this->group)) {
+            $sql .= ' GROUP BY '.$this->group;
+        }
         if (!is_null($this->order)) {
-            $sql.= ' ORDER BY ' . $this->order;
+            $sql .= ' ORDER BY '.implode(',', $this->order);
         }
         if (!is_null($this->limit)) {
             $sql.= ' LIMIT ' . $this->limit;
@@ -521,12 +524,15 @@ class DB extends Base {
         if (is_null($this->table)) {
             die('table is null');
         }
-        $sql = 'DELETE FROM `' . $this->prefix . $this->table . '`';
+        $sql = 'DELETE FROM `'. $this->table .'`';
         if (!is_null($this->where)) {
             $sql.= ' WHERE ' . $this->getWhere();
         }
+        if (!is_null($this->group)) {
+            $sql .= ' GROUP BY '.$this->group;
+        }
         if (!is_null($this->order)) {
-            $sql.= ' ORDER BY ' . $this->order;
+            $sql .= ' ORDER BY '.implode(',', $this->order);
         }
         if (!is_null($this->limit)) {
             $sql.= ' LIMIT ' . $this->limit;
