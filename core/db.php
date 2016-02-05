@@ -367,7 +367,7 @@ class DB extends Base {
         return $this;
     }
 
-    public function group($param) {
+    public function group() {
         $num = func_num_args();
         $var = func_get_args();
         if ($num < 1) {
@@ -584,6 +584,9 @@ class DB extends Base {
         $sql = 'SELECT DISTINCT(' . $param . ') FROM `' . $this->table . '`';
         if (!is_null($this->where)) {
             $sql .= ' WHERE '.$this->getWhere();
+        }
+        if (!is_null($this->group)) {
+            $sql .= ' GROUP BY '.$this->group;
         }
         if (!is_null($this->order)) {
             $sql .= ' ORDER BY '.implode(',', $this->order);
