@@ -19,7 +19,7 @@ class Model extends DB {
     /**
      * 根据主键取出一条数据
      */
-    protected function find() {
+    protected function find($id) {
 
     }
 
@@ -59,16 +59,16 @@ class Model extends DB {
     }
 
     /**
-    * 字段自增
+    * 自增值
     */
-    protected function increment() {
+    protected function increment($field, $num = null) {
 
     }
 
     /**
-    * 字段自减
+    * 自减值
     */
-    protected function decrement() {
+    protected function decrement($field, $num = null) {
 
     }
 
