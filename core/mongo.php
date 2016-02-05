@@ -1,12 +1,8 @@
 <?php
 /**
- *
  * Cellular Framework
- * Mongo 封装
- *
- * @author Cloud 66999882@qq.com
- * @version 1.0 2016-02-03
- *
+ * Mongo 类
+ * @copyright Cellular Team
  */
 namespace core;
 
