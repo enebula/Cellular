@@ -14,11 +14,11 @@ class DB extends Base {
     private $pdo;
     private $prefix;
     private $table;
-    private $field;
     private $param; // sql parameter
     private $stmt; // sql statement
     private $where;
     private $whereChild;
+    private $group;
     private $order;
     private $limit;
     private $sql;
@@ -56,15 +56,48 @@ class DB extends Base {
         }
     }
 
+    /**
+     * 格式化字段
+     */
+    private function formatField($value) {
+        if (!is_null($value)) {
+            if (is_array($value)) $value = implode(',', $value);
+            if (is_string($value)) {
+                if (strpos($value, '.')) $value = $this->prefix.$value;
+                $format = array(
+                    ',' => '`,`',
+                    '.' => '`.`',
+                    '(' => '(`',
+                    ')' => '`)',
+                );
+                return '`'. strtr($value, $format) .'`';
+            }
+        }
+        return null;
+    }
+
     public function table($param) {
         if (is_null($param)) {
             die('table param is null');
         }
+        $this->param = null;
+        $this->join = null;
         $this->where = null;
         $this->whereChild = null;
+        $this->group = null;
         $this->order = null;
         $this->limit = null;
-        $this->table = $param;
+        $this->table = $this->prefix.$param;
+        return $this;
+    }
+
+    public function leftJoin() {
+        $num = func_num_args();
+        $var = func_get_args();
+        if ($num == 3) {
+            $this->join[] = ' LEFT JOIN `'. $this->prefix.$var[0] .'` ON '. $this->formatField($var[1]) .' = '. $this->formatField($var[2]);
+        }
+        //var_dump($this->group); exit;
         return $this;
     }
 
@@ -116,45 +149,56 @@ class DB extends Base {
                 } else {
                     switch ($key) {
                         case 'and':
-                            $sql.= ' `' . $param[0] . '` ' . $param[1] . ' \'' . $param[2] . '\' ';
+                            $sql.= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
+                            $this->param[] = $param[2];
                             break;
-
                         case 'or':
-                            $sql.= ' `' . $param[0] . '` ' . $param[1] . ' \'' . $param[2] . '\' ';
+                            $sql.= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
+                            $this->param[] = $param[2];
                             break;
-
                         case 'like':
-                            $keyword = $param[2] == 'center' ? '%' . $param[1] . '%' : ($param[2] == 'left' ? '%' . $param[1] : $param[1] . '%');
-                            $sql.= ' `' . $param[0] . '` LIKE \'' . $keyword . '\' ';
+                            $keyword = ($param[2] == 'both') ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
+                            $sql.= ' `' . $param[0] . '` LIKE '. $keyword .' ';
+                            $this->param[] = $param[1];
                             break;
-
                         case 'notlike':
-                            $keyword = $param[2] == 'center' ? '%' . $param[1] . '%' : ($param[2] == 'left' ? '%' . $param[1] : $param[1] . '%');
-                            $sql.= ' `' . $param[0] . '` NOT LIKE \'' . $keyword . '\' ';
+                            $keyword = $param[2] == 'both' ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
+                            $sql.= ' `' . $param[0] . '` NOT LIKE '. $keyword .' ';
+                            $this->param[] = $param[1];
                             break;
-
                         case 'between':
-                            $sql.= ' `' . $param[0] . '` BETWEEN \'' . $param[1] . '\' AND \'' . $param[2] . '\' ';
+                            $sql.= ' `' . $param[0] . '` BETWEEN ? AND ? ';
+                            $this->param[] = $param[1];
+                            $this->param[] = $param[2];
                             break;
-
                         case 'notbetween':
-                            $sql.= ' `' . $param[0] . '` NOT BETWEEN \'' . $param[1] . '\' AND \'' . $param[2] . '\' ';
+                            $sql.= ' `' . $param[0] . '` NOT BETWEEN ? AND ? ';
+                            $this->param[] = $param[1];
+                            $this->param[] = $param[2];
                             break;
-
                         case 'null':
                             $sql.= ' `' . $param[0] . '` IS NULL ';
                             break;
-
                         case 'notnull':
                             $sql.= ' `' . $param[0] . '` IS NOT NULL ';
                             break;
-
                         case 'in':
-                            $sql.= ' `' . $param[0] . '` IN(\'' . str_replace(',', '\',\'', $param[1]) . '\')';
+                            $param[1] = explode(',', $param[1]);
+                            $var = null;
+                            foreach ($param[1] as $value) {
+                                $this->param[] = $value;
+                                $var .= ',?';
+                            }
+                            $sql.= ' `' . $param[0] . '` IN('. substr($var, 1) .') ';
                             break;
-
                         case 'notin':
-                            $sql.= ' `' . $param[0] . '` NOT IN(\'' . str_replace(',', '\',\'', $param[1]) . '\')';
+                            $param[1] = explode(',', $param[1]);
+                            $var = null;
+                            foreach ($param[1] as $value) {
+                                $this->param[] = $value;
+                                $var .= ',?';
+                            }
+                            $sql.= ' `' . $param[0] . '` NOT IN('. substr($var, 1) .') ';
                             break;
                     }
                 }
@@ -249,7 +293,7 @@ class DB extends Base {
 
             case 2:
                 //全匹配
-                $value = array($var[0], $var[1], 'center');
+                $value = array($var[0], $var[1], 'both');
                 break;
 
             case 3:
@@ -271,12 +315,10 @@ class DB extends Base {
                 //字符串条件
                 $value = $var[0];
                 break;
-
             case 2:
                 //全匹配
                 $value = array($var[0], $var[1], 'center');
                 break;
-
             case 3:
                 //左匹配或右匹配
                 $var[2] = $var[2] == 'left' ? 'left' : 'right';
@@ -329,42 +371,31 @@ class DB extends Base {
         if (is_null($param)) {
             die('group param is null');
         }
-        if (is_array($param)) {
-            foreach ($param as $value) {
-                $this->group = ',' . $value;
-            }
-            $this->group = 'GROUP BY ' . substr($this->group, 1);
-        }
-        if (is_string($param)) {
-            $this->group = 'GROUP BY ' . $param;
-        }
+        $this->group = $this->formatField($param);
         return $this;
     }
 
-    public function order($param) {
-        if (is_null($param)) {
+    public function order() {
+        $num = func_num_args();
+        $var = func_get_args();
+        if ($num == 1) {
+            $this->order[] = $var[0];
+        } elseif ($num == 2) {
+            $this->order[] = $this->formatField($var[0]).' DESC';
+        } else {
             die('order param is null');
         }
-        if (is_array($param)) {
-            foreach ($param as $key => $value) {
-                $this->order.= ',' . $key . ' ' . $value;
-            }
-            $this->order = substr($this->order, 1);
-        }
-        if (is_string($param)) {
-            $this->order = $param;
-        }
         return $this;
     }
 
-    public function limit($param) {
-        if (is_null($param)) {
-            die('limit param is null');
+    public function limit() {
+        $var = func_get_args();
+        $this->limit = null;
+        if (isset($var[0]) && is_numeric($var[0])) {
+            $this->limit .= $var[0];
         }
-        if (is_array($param)) {
-            $this->limit = implode(', ', $param);
-        } else {
-            $this->limit = $param;
+        if (isset($var[1]) && is_numeric($var[1])) {
+            $this->limit .= ','.$var[1];
         }
         return $this;
     }
@@ -381,19 +412,9 @@ class DB extends Base {
             return $this->stmt->fetchAll();
         } else {
             $this->stmt = $this->pdo->prepare($sql);
-            foreach ($this->param as $key => $value) {
-                $this->stmt->bindParam(':' . $key, $value);
-            }echo ':' . $this->stmt->debugDumpParams() . '<br>';
-            return $this->stmt->execute()->fetchAll();
-        }
-    }
-
-    /**
-     * 查询记录
-     */
-    public function find($param, $field = 'id', $operator = '=') {
-        if (is_null($this->table)) {
-            die('table is null');
+            $this->stmt->execute($this->param);
+            echo ':' . $this->stmt->debugDumpParams() . '<br>';
+            return $this->stmt->fetchAll();
         }
     }
 
@@ -408,26 +429,28 @@ class DB extends Base {
         if (is_null($this->table)) {
             die('table is null');
         }
-        $sql = 'SELECT ';
-        if (is_null($param)) {
-            // field is null select all
-            $sql.= '*';
-        } elseif (is_string($param)) {
-            // field is string
-            $sql.= $param;
-        } elseif (is_array($param)) {
-            // field is array
-            $sql.= '`' . implode('`,`', $param) . '`';
+        $param = $this->formatField($param);
+        if (is_null($param)) $param = '*';
+        $sql = 'SELECT '.$param;
+        $sql.= ' FROM `'. $this->table .'`';
+        if (!is_null($this->join)) {
+            if (is_array($this->join)) {
+                foreach ($this->join as $value) {
+                    $sql .= $value;
+                }
+            }
         }
-        $sql.= ' FROM `' . $this->prefix . $this->table . '`';
         if (!is_null($this->where)) {
-            $sql.= ' WHERE ' . $this->getWhere();
+            $sql .= ' WHERE '.$this->getWhere();
+        }
+        if (!is_null($this->group)) {
+            $sql .= ' GROUP BY '.$this->group;
         }
         if (!is_null($this->order)) {
-            $sql.= ' ORDER BY ' . $this->order;
+            $sql .= ' ORDER BY '.implode(',', $this->order);
         }
         if (!is_null($this->limit)) {
-            $sql.= ' LIMIT ' . $this->limit;
+            $sql .= ' LIMIT '.$this->limit;
         }
         try {
             return $this->query($sql);
@@ -455,7 +478,7 @@ class DB extends Base {
         }
         $val = array_values($param);
         unset($param);
-        $sql = 'INSERT INTO `' . $this->prefix . $this->table . '` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
+        $sql = 'INSERT INTO `'. $this->table .'` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
         echo $sql . '<br>';
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($val);
@@ -471,7 +494,7 @@ class DB extends Base {
         if (is_null($param)) {
             die('update param is null');
         }
-        $sql = 'UPDATE `' . $this->prefix . $this->table . '` SET ';
+        $sql = 'UPDATE `'. $this->table .'` SET ';
         foreach ($param as $k => $v) {
             $sql.= '`' . $k . '`=?';
         }
