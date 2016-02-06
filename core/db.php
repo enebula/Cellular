@@ -108,6 +108,7 @@ class DB extends Base {
                     $join .= $this->formatField($var[1]).$var[2].$this->formatField($var[3]);
                     break;
             }
+            $this->join[] = $join;
         } else {
             die('leftJoin param is null');
         }
