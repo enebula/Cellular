@@ -94,10 +94,23 @@ class DB extends Base {
     public function leftJoin() {
         $num = func_num_args();
         $var = func_get_args();
-        if ($num == 3) {
-            $this->join[] = ' LEFT JOIN `'. $this->prefix.$var[0] .'` ON '. $this->formatField($var[1]) .' = '. $this->formatField($var[2]);
+        if ($num > 1) {
+            $join = ' LEFT JOIN `'. $this->prefix.$var[0] .'` ON ';
+            switch ($num) {
+                case 2:
+                    $join .= $this->formatField($var[1]);
+                    break;
+                case 3:
+                    $join .= $this->formatField($var[1]).'='.$this->formatField($var[2]);
+                    break;
+                case 4:
+                    $var[2] = in_array($var[2], array('=','>','>','>=','=<','<>')) ? $var[2] : '=';
+                    $join .= $this->formatField($var[1]).$var[2].$this->formatField($var[3]);
+                    break;
+            }
+        } else {
+            die('leftJoin param is null');
         }
-        //var_dump($this->group); exit;
         return $this;
     }
 
