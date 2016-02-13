@@ -1,5 +1,6 @@
 <?php
 return array(
-	'assets_path' => '/assets'
+	'timezone' => 'Asia/Shanghai',
+	'assets_path' => './assets'
 );
 ?>

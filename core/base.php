@@ -22,7 +22,7 @@ class Base {
     protected function loadClass($className, $param = null)
     {
         if (null === $this->class) $this->class = new \stdClass();
-        $name = strtr($className, '.', '_');
+        $name = strtr(strtolower($className), '.', '_');
         if (!isset($this->class->$name)) {
             $this->class->$name = Cellular::loadClass($className, $param);
         }
@@ -34,8 +34,7 @@ class Base {
 	 */
 	protected function config($name)
 	{
-        $path = Cellular::$appStruct['config'].DIRECTORY_SEPARATOR.$name.'.php';
-		return Cellular::loadFile($path);
+		return Cellular::config($name);
 	}
 
 }
