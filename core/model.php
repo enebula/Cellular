@@ -5,16 +5,29 @@
  * @copyright Cellular Team
  */
 namespace core;
-use Cellular;
 
 class Model extends DB
 {
+    public $table;
+
+    /**
+     * Model constructor.
+     * @param null $table
+     */
+    public function __construct($table = null)
+    {
+        if (!is_null($table)) {
+            $this->table = $table;
+        }
+    }
+
     /**
      * 取出所有记录
      */
     protected function all()
     {
-
+        $sql = 'SELECT * FROM `' . $this->table . '`';
+        return $this->query($sql);
     }
 
     /**
@@ -22,7 +35,8 @@ class Model extends DB
      */
     protected function find($id)
     {
-
+        $sql = 'SELECT * FROM `' . $this->table . '` WHERE `id` = \'' . $id . '\'';
+        return $this->query($sql);
     }
 
     /**

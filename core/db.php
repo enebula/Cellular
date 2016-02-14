@@ -6,13 +6,13 @@
  */
 namespace core;
 use PDO;
-use Cellular;
+use PDOException;
 
 class DB extends Base
 {
     private $pdo;
     private $prefix;
-    public $table; // Model use this
+    private $table;
     private $param; // sql parameter
     private $stmt; // sql statement
     private $where;
