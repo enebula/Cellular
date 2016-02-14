@@ -6,23 +6,25 @@
  */
 namespace core;
 
-class Cart {
+class Cart
+{
+	private $cookie;
 
-  private $cookie;
+	public function __construct()
+	{
 
-  public function __construct()
-  {
+	}
 
-  }
-
-	function __set($name, $value) {
+	function __set($name, $value)
+	{
 		$this->$name = $value;
 	}
 
 	/**
 	 * 查找
 	 */
-	function search($id) {
+	function search($id)
+	{
 		if (isset($_COOKIE[$this->cookie])) {
 			$cart = unserialize($_COOKIE[$this->cookie]);
 			if (isset($cart[$id])) {
@@ -37,7 +39,8 @@ class Cart {
 	 * id:编号
 	 * number:数量
 	 */
-	function add($id, $number) {
+	function add($id, $number)
+	{
 		if ($this->search($id)) {
 			$cart = unserialize($_COOKIE[$this->cookie]);
 			$cart[$id] += $number;
@@ -54,7 +57,8 @@ class Cart {
 	/**
 	 * 更新
 	 */
-	function update($id, $number) {
+	function update($id, $number)
+	{
 		if ($this->search($id)) {
 			$cart = unserialize($_COOKIE[$this->cookie]);
 			$cart[$id] = $number;
@@ -66,10 +70,11 @@ class Cart {
 	 * 移除
 	 * id:编号
 	 */
-	function remove($id) {
+	function remove($id)
+	{
 		if (isset($_COOKIE[$this->cookie])) {
 			$cart = unserialize($_COOKIE[$this->cookie]);
-			if (isset($cart[$id])){
+			if (isset($cart[$id])) {
 				unset($cart[$id]);
 			}
 			if (count($cart) > 0) {
@@ -83,19 +88,20 @@ class Cart {
 	/**
 	 * 清空
 	 */
-	function clear() {
+	function clear()
+	{
 		setCookie($this->cookie, null, time() - 1);
 	}
-  
+
 	/**
 	 * 获取
 	 */
-	function get() {
+	function get()
+	{
 		if (isset($_COOKIE[$this->cookie])) {
 			return unserialize($_COOKIE[$this->cookie]);
 		}
 		return null;
 	}
-
 }
 ?>
