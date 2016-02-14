@@ -37,8 +37,6 @@ class DB extends Base
      */
     function __destruct()
     {
-        return time();
-        //return $this->pdo->query($this->sql);
         $this->pdo = null;
     }
 
