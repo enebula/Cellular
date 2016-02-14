@@ -12,6 +12,7 @@ class Cellular {
 
 	private static $frameworkPath; //框架根目录
 	private static $appPath; //应用程序根目录
+	private static $webRootPath; //web根目录
 	private static $assetsPath; //静态资源目录
 	private static $config; //应用配置文件
 	private static $URI; //URI请求资源
@@ -71,20 +72,20 @@ class Cellular {
 	{
 		self::$frameworkPath = dirname(__FILE__).DIRECTORY_SEPARATOR;
 		self::$appPath = ($path == null) ? './' : $path;
-		self::$assetsPath = substr($_SERVER['DOCUMENT_URI'], 0, strrpos($_SERVER['DOCUMENT_URI'], '/'));
 		//获取uri
-		if (!self::getURI()) {
-			self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
-		}
-		//加载应用配置文件
-		self::$config = self::config('app');
-		//设置默认时区
-		if (isset(self::$config['timezone'])) date_default_timezone_set(self::$config['timezone']);
-		//定义静态资源常量
-		if (!empty(self::$config['assets_path'])) self::$assetsPath = self::$config['assets_path'];
-		define('ASSETS', self::$assetsPath);
-		//启动转发器
-		if (!self::hub()) {
+		if (self::getURI()) {
+			//加载应用配置文件
+			self::$config = self::config('app');
+			//设置默认时区
+			if (isset(self::$config['timezone'])) date_default_timezone_set(self::$config['timezone']);
+			//定义静态资源常量
+			define('WEBROOTPATH', self::$webRootPath);
+			define('ASSETS', empty(self::$config['assets_path']) ? self::$assetsPath : self::$config['assets_path']);
+			//启动转发器
+			if (!self::hub()) {
+				self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
+			}
+		} else {
 			self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
 		}
 	}
@@ -92,9 +93,13 @@ class Cellular {
 	private static function getURI()
 	{
 		//获取请求资源ID
-		$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? str_replace('/'.self::$appName.'/', '', $_SERVER['REQUEST_URI']) : '');
-		//过滤脚本目录
-		$requestURI = str_replace(substr($_SERVER['SCRIPT_NAME'], 0, strripos($_SERVER['SCRIPT_NAME'], '/')), '', $requestURI);
+		$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
+		//获取web根目录，当应用入口不在web根目录时有效
+		self::$webRootPath = substr($_SERVER['DOCUMENT_URI'], 0, strrpos($_SERVER['DOCUMENT_URI'], '/'));
+		if (!empty(self::$webRootPath)) {
+			$requestURI = str_replace(self::$webRootPath, '', $requestURI); //过滤脚本目录
+			self::$assetsPath = self::$webRootPath;
+		}
 		//请求资源检查
 		if (!preg_match("/^[A-Za-z0-9_\-\/.%&#@]+$/", $requestURI) && !empty($requestURI)) {
 			self::$errorMsg = array(
