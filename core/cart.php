@@ -10,19 +10,28 @@ class Cart
 {
 	private $cookie;
 
+    /**
+     * Cart constructor.
+     */
 	public function __construct()
 	{
 
 	}
 
+    /**
+     * @param $name 名称
+     * @param $value 值
+     */
 	function __set($name, $value)
 	{
 		$this->$name = $value;
 	}
 
-	/**
-	 * 查找
-	 */
+    /**
+     * 查找
+     * @param $id
+     * @return bool
+     */
 	function search($id)
 	{
 		if (isset($_COOKIE[$this->cookie])) {
@@ -34,11 +43,11 @@ class Cart
 		return false;
 	}
 
-	/**
-	 * 添加
-	 * id:编号
-	 * number:数量
-	 */
+    /**
+     * 添加
+     * @param $id 编号
+     * @param $number 数量
+     */
 	function add($id, $number)
 	{
 		if ($this->search($id)) {
@@ -54,9 +63,11 @@ class Cart
 		}
 	}
 
-	/**
-	 * 更新
-	 */
+    /**
+     * 更新
+     * @param $id 编号
+     * @param $number 数量
+     */
 	function update($id, $number)
 	{
 		if ($this->search($id)) {
@@ -66,10 +77,10 @@ class Cart
 		}
 	}
 
-	/**
-	 * 移除
-	 * id:编号
-	 */
+    /**
+     * 移除
+     * @param $id 编号
+     */
 	function remove($id)
 	{
 		if (isset($_COOKIE[$this->cookie])) {
@@ -85,9 +96,9 @@ class Cart
 		}
 	}
 
-	/**
-	 * 清空
-	 */
+    /**
+     * 清空
+     */
 	function clear()
 	{
 		setCookie($this->cookie, null, time() - 1);
