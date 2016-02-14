@@ -6,9 +6,9 @@
  */
 namespace core;
 
-class Cart extends Base {
+class Cart {
 
-  private $cookie = null;
+  private $cookie;
 
   public function __construct()
   {
