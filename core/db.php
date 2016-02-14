@@ -469,6 +469,15 @@ class DB extends Base
     }
 
     /**
+     * 返回受影响的行数
+     * @param $sql
+     */
+    public function exec($sql)
+    {
+        return $this->pdo->exec($sql);
+    }
+
+    /**
      * 查询一条数据中的一列
      */
     public function column($sql)

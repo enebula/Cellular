@@ -118,17 +118,55 @@ class Model extends DB
     /**
      * 自增值
      */
-    protected function increment($field, $num = null)
+    protected function increment($field, $num = 1)
     {
-
+        if (is_null($this->table)) {
+            die('table is null');
+        }
+        if (!is_numeric($num)) {
+            die('num is not numeric');
+        }
+        $sql = 'UPDATE `' . $this->table . '` SET `' . $field . '` = `' . $field . '` + ' . $num;
+        if (!is_null($this->where)) {
+            $sql .= ' WHERE ' . $this->getWhere();
+        }
+        if (!is_null($this->order)) {
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
+        }
+        if (!is_null($this->limit)) {
+            $sql .= ' LIMIT ' . $this->limit;
+        }
+        return $this->exec($sql);
     }
 
     /**
      * 自减值
      */
-    protected function decrement($field, $num = null)
+    protected function decrement($field, $num = 1)
     {
-
+        if (is_null($this->table)) {
+            die('table is null');
+        }
+        if (!is_numeric($num)) {
+            die('num is not numeric');
+        }
+        if (is_null($this->table)) {
+            die('table is null');
+        }
+        if (!is_numeric($num)) {
+            die('num is not numeric');
+        }
+        $sql = 'UPDATE `' . $this->table . '` SET `' . $field . '` = `' . $field . '` - ' . $num;
+        if (!is_null($this->where)) {
+            $sql .= ' WHERE ' . $this->getWhere();
+        }
+        if (!is_null($this->order)) {
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
+        }
+        if (!is_null($this->limit)) {
+            $sql .= ' LIMIT ' . $this->limit;
+        }
+        return $this->exec($sql);
     }
 }
 ?>
