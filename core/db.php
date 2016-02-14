@@ -4,13 +4,12 @@
  * DB - PDO Database Class
  * @copyright Cellular Team
  */
-
 namespace core;
 use PDO;
 use Cellular;
 
-class DB extends Base {
-
+class DB extends Base
+{
     private $pdo;
     private $prefix;
     private $table;
@@ -28,14 +27,16 @@ class DB extends Base {
     /**
      * 构造函数
      */
-    function __construct() {
+    function __construct()
+    {
         $this->connect();
     }
 
     /**
      * 析构函数
      */
-    function __destruct() {
+    function __destruct()
+    {
         return time();
         //return $this->pdo->query($this->sql);
         $this->pdo = null;
@@ -44,14 +45,14 @@ class DB extends Base {
     /**
      * 连接数据库
      */
-    private function connect() {
+    private function connect()
+    {
         $config = $this->config('mysql');
         $this->prefix = $config['prefix'];
         $dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['database'];
         try {
             $this->pdo = new PDO($dsn, $config['username'], $config['password']);
-        }
-        catch(PDOException $e) {
+        } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
     }
@@ -59,24 +60,26 @@ class DB extends Base {
     /**
      * 格式化字段
      */
-    private function formatField($value) {
+    private function formatField($value)
+    {
         if (!is_null($value)) {
             if (is_array($value)) $value = implode(',', $value);
             if (is_string($value)) {
-                if (strpos($value, '.')) $value = $this->prefix.$value;
+                if (strpos($value, '.')) $value = $this->prefix . $value;
                 $format = array(
                     ',' => '`,`',
                     '.' => '`.`',
                     '(' => '(`',
                     ')' => '`)',
                 );
-                return '`'. strtr($value, $format) .'`';
+                return '`' . strtr($value, $format) . '`';
             }
         }
         return null;
     }
 
-    public function table($param) {
+    public function table($param)
+    {
         if (is_null($param)) {
             die('table param is null');
         }
@@ -91,21 +94,22 @@ class DB extends Base {
         return $this;
     }
 
-    public function leftJoin() {
+    public function leftJoin()
+    {
         $num = func_num_args();
         $var = func_get_args();
         if ($num > 1) {
-            $join = ' LEFT JOIN `'. $this->prefix.$var[0] .'` ON ';
+            $join = ' LEFT JOIN `' . $this->prefix . $var[0] . '` ON ';
             switch ($num) {
                 case 2:
                     $join .= $this->formatField($var[1]);
                     break;
                 case 3:
-                    $join .= $this->formatField($var[1]).'='.$this->formatField($var[2]);
+                    $join .= $this->formatField($var[1]) . '=' . $this->formatField($var[2]);
                     break;
                 case 4:
-                    $var[2] = in_array($var[2], array('=','>','>','>=','=<','<>')) ? $var[2] : '=';
-                    $join .= $this->formatField($var[1]).$var[2].$this->formatField($var[3]);
+                    $var[2] = in_array($var[2], array('=', '>', '<', '>=', '<=', '<>')) ? $var[2] : '=';
+                    $join .= $this->formatField($var[1]) . $var[2] . $this->formatField($var[3]);
                     break;
             }
             $this->join[] = $join;
@@ -118,7 +122,8 @@ class DB extends Base {
     /**
      * 设置WHERE 条件子句
      */
-    private function setWhere($value, $type) {
+    private function setWhere($value, $type)
+    {
         if (!empty($value)) {
             if (is_array($this->whereChild)) {
                 $this->whereChild[][$type] = $value;
@@ -128,7 +133,8 @@ class DB extends Base {
         }
     }
 
-    private function setChildWhere($type) {
+    private function setChildWhere($type)
+    {
         $this->where[][$type] = $this->whereChild;
         $this->whereChild = null;
     }
@@ -136,7 +142,8 @@ class DB extends Base {
     /**
      * 生成WHERE 条件子句
      */
-    private function getWhere($value = null) {
+    private function getWhere($value = null)
+    {
         $sql = '';
         $value = is_null($value) ? $this->where : $value;
         foreach ($value as $k => $val) {
@@ -147,54 +154,54 @@ class DB extends Base {
                 'or' => 'OR',
             );
             if (0 !== $k) {
-                $sql.= isset($exp[$key]) ? $exp[$key] : 'AND';
+                $sql .= isset($exp[$key]) ? $exp[$key] : 'AND';
             }
             if (is_array($param)) {
                 if (is_array($param[0])) {
                     switch ($key) {
                         case 'and':
-                            $sql.= ' (' . $this->getWhere($param) . ') ';
+                            $sql .= ' (' . $this->getWhere($param) . ') ';
                             break;
 
                         case 'or':
-                            $sql.= ' (' . $this->getWhere($param) . ') ';
+                            $sql .= ' (' . $this->getWhere($param) . ') ';
                             break;
                     }
                 } else {
                     switch ($key) {
                         case 'and':
-                            $sql.= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
+                            $sql .= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
                             $this->param[] = $param[2];
                             break;
                         case 'or':
-                            $sql.= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
+                            $sql .= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
                             $this->param[] = $param[2];
                             break;
                         case 'like':
                             $keyword = ($param[2] == 'both') ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
-                            $sql.= ' `' . $param[0] . '` LIKE '. $keyword .' ';
+                            $sql .= ' `' . $param[0] . '` LIKE ' . $keyword . ' ';
                             $this->param[] = $param[1];
                             break;
                         case 'notlike':
                             $keyword = $param[2] == 'both' ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
-                            $sql.= ' `' . $param[0] . '` NOT LIKE '. $keyword .' ';
+                            $sql .= ' `' . $param[0] . '` NOT LIKE ' . $keyword . ' ';
                             $this->param[] = $param[1];
                             break;
                         case 'between':
-                            $sql.= ' `' . $param[0] . '` BETWEEN ? AND ? ';
+                            $sql .= ' `' . $param[0] . '` BETWEEN ? AND ? ';
                             $this->param[] = $param[1];
                             $this->param[] = $param[2];
                             break;
                         case 'notbetween':
-                            $sql.= ' `' . $param[0] . '` NOT BETWEEN ? AND ? ';
+                            $sql .= ' `' . $param[0] . '` NOT BETWEEN ? AND ? ';
                             $this->param[] = $param[1];
                             $this->param[] = $param[2];
                             break;
                         case 'null':
-                            $sql.= ' `' . $param[0] . '` IS NULL ';
+                            $sql .= ' `' . $param[0] . '` IS NULL ';
                             break;
                         case 'notnull':
-                            $sql.= ' `' . $param[0] . '` IS NOT NULL ';
+                            $sql .= ' `' . $param[0] . '` IS NOT NULL ';
                             break;
                         case 'in':
                             $param[1] = explode(',', $param[1]);
@@ -203,7 +210,7 @@ class DB extends Base {
                                 $this->param[] = $value;
                                 $var .= ',?';
                             }
-                            $sql.= ' `' . $param[0] . '` IN('. substr($var, 1) .') ';
+                            $sql .= ' `' . $param[0] . '` IN(' . substr($var, 1) . ') ';
                             break;
                         case 'notin':
                             $param[1] = explode(',', $param[1]);
@@ -212,7 +219,7 @@ class DB extends Base {
                                 $this->param[] = $value;
                                 $var .= ',?';
                             }
-                            $sql.= ' `' . $param[0] . '` NOT IN('. substr($var, 1) .') ';
+                            $sql .= ' `' . $param[0] . '` NOT IN(' . substr($var, 1) . ') ';
                             break;
                     }
                 }
@@ -222,10 +229,10 @@ class DB extends Base {
                     '>' => '` > \'',
                     '<' => '` < \'',
                     '>=' => '` >= \'',
-                    '=<' => '` =< \'',
+                    '<=' => '` <= \'',
                     '<>' => '` <> \''
                 );
-                $sql.= ' `' . strtr($param, $arr) . '\' ';
+                $sql .= ' `' . strtr($param, $arr) . '\' ';
             }
         }
         return trim($sql);
@@ -234,7 +241,8 @@ class DB extends Base {
     /**
      * WHERE 条件子句
      */
-    public function where() {
+    public function where()
+    {
         $num = func_num_args();
         $var = func_get_args();
         if (is_callable($var[0])) {
@@ -264,7 +272,8 @@ class DB extends Base {
         return $this;
     }
 
-    public function orWhere() {
+    public function orWhere()
+    {
         $num = func_num_args();
         $var = func_get_args();
         if ($num == 0) return $this;
@@ -295,7 +304,8 @@ class DB extends Base {
         return $this;
     }
 
-    public function like() {
+    public function like()
+    {
         $num = func_num_args();
         $var = func_get_args();
         $value = array();
@@ -320,7 +330,8 @@ class DB extends Base {
         return $this;
     }
 
-    public function notLike() {
+    public function notLike()
+    {
         $num = func_num_args();
         $var = func_get_args();
         $value = array();
@@ -343,45 +354,52 @@ class DB extends Base {
         return $this;
     }
 
-    public function between($field, $min, $max) {
+    public function between($field, $min, $max)
+    {
         $value = array($field, $min, $max);
         $this->setWhere($value, 'between');
         return $this;
     }
 
-    public function notBetween($field, $min, $max) {
+    public function notBetween($field, $min, $max)
+    {
         $value = array($field, $min, $max);
         $this->setWhere($value, 'notbetween');
         return $this;
     }
 
-    public function isNull($field) {
+    public function isNull($field)
+    {
         $value = array($field);
         $this->setWhere($value, 'null');
         return $this;
     }
 
-    public function isNotNull($field) {
+    public function isNotNull($field)
+    {
         $value = array($field);
         $this->setWhere($value, 'notnull');
         return $this;
     }
 
-    public function in($field, $param) {
+    public function in($field, $param)
+    {
         $param = is_array($param) ? implode(',', $param) : $param;
         $value = array($field, $param);
         $this->setWhere($value, 'in');
         return $this;
     }
 
-    public function notIn($field, $param) {
+    public function notIn($field, $param)
+    {
         $param = is_array($param) ? implode(',', $param) : $param;
         $value = array($field, $param);
         $this->setWhere($value, 'notin');
         return $this;
     }
 
-    public function group() {
+    public function group()
+    {
         $num = func_num_args();
         $var = func_get_args();
         if ($num < 1) {
@@ -393,45 +411,51 @@ class DB extends Base {
         return $this;
     }
 
-    public function order() {
+    public function order()
+    {
         $num = func_num_args();
         $var = func_get_args();
         if ($num == 1) {
             $this->order[] = $var[0];
         } elseif ($num == 2) {
-            $this->order[] = $this->formatField($var[0]).' DESC';
+            $this->order[] = $this->formatField($var[0]) . ' DESC';
         } else {
             die('order param is null');
         }
         return $this;
     }
 
-    public function limit() {
+    public function limit()
+    {
         $var = func_get_args();
         $this->limit = null;
         if (isset($var[0]) && is_numeric($var[0])) {
             $this->limit .= $var[0];
         }
         if (isset($var[1]) && is_numeric($var[1])) {
-            $this->limit .= ','.$var[1];
+            $this->limit .= ',' . $var[1];
         }
         return $this;
     }
 
-    public function query($sql) {
+    public function query($sql)
+    {
         echo $sql . '<br>';
         if (is_null($this->param)) {
             try {
                 $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
-            }
-            catch(PDOException $e) {
+            } catch (PDOException $e) {
                 die('PDOException: ' . $e->getMessage());
             }
             return $this->stmt->fetchAll();
         } else {
-            $this->stmt = $this->pdo->prepare($sql);
-            $this->stmt->execute($this->param);
-            echo ':' . $this->stmt->debugDumpParams() . '<br>';
+            try {
+                $this->stmt = $this->pdo->prepare($sql);
+                $this->stmt->execute($this->param);
+                echo ':' . $this->stmt->debugDumpParams() . '<br>';
+            } catch (PDOException $e) {
+                die('PDOException: ' . $e->getMessage());
+            }
             return $this->stmt->fetchAll();
         }
     }
@@ -439,18 +463,35 @@ class DB extends Base {
     /**
      * 查询一条记录
      */
-    public function first() {
+    public function first()
+    {
         // PDO - fetch()
     }
 
-    public function select($param = null) {
+    /**
+     * 查询一条数据中的一列
+     */
+    public function column($sql)
+    {
+        echo $sql . '<br>';
+        try {
+            $this->stmt = $this->pdo->prepare($sql);
+            $this->stmt->execute();
+        } catch (PDOException $e) {
+            die('PDOException: ' . $e->getMessage());
+        }
+        return $this->stmt->fetchColumn();
+    }
+
+    public function select($param = null)
+    {
         if (is_null($this->table)) {
             die('table is null');
         }
         $param = $this->formatField($param);
         if (is_null($param)) $param = '*';
-        $sql = 'SELECT '.$param;
-        $sql.= ' FROM `'. $this->table .'`';
+        $sql = 'SELECT ' . $param;
+        $sql .= ' FROM `' . $this->table . '`';
         if (!is_null($this->join)) {
             if (is_array($this->join)) {
                 foreach ($this->join as $value) {
@@ -459,21 +500,20 @@ class DB extends Base {
             }
         }
         if (!is_null($this->where)) {
-            $sql .= ' WHERE '.$this->getWhere();
+            $sql .= ' WHERE ' . $this->getWhere();
         }
         if (!is_null($this->group)) {
-            $sql .= ' GROUP BY '.$this->group;
+            $sql .= ' GROUP BY ' . $this->group;
         }
         if (!is_null($this->order)) {
-            $sql .= ' ORDER BY '.implode(',', $this->order);
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
         }
         if (!is_null($this->limit)) {
-            $sql .= ' LIMIT '.$this->limit;
+            $sql .= ' LIMIT ' . $this->limit;
         }
         try {
             return $this->query($sql);
-        }
-        catch(PDOException $e) {
+        } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
     }
@@ -481,7 +521,8 @@ class DB extends Base {
     /**
      * 插入记录
      */
-    public function insert($param) {
+    public function insert($param)
+    {
         if (is_null($this->table)) {
             die('table is null');
         }
@@ -491,12 +532,12 @@ class DB extends Base {
         $key = null;
         $value = null;
         foreach ($param as $k => $v) {
-            $key.= ',`' . $k . '`';
-            $value.= ',?';
+            $key .= ',`' . $k . '`';
+            $value .= ',?';
         }
         $val = array_values($param);
         unset($param);
-        $sql = 'INSERT INTO `'. $this->table .'` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
+        $sql = 'INSERT INTO `' . $this->table . '` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
         echo $sql . '<br>';
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($val);
@@ -505,30 +546,31 @@ class DB extends Base {
     /**
      * 更新记录
      */
-    public function update($param) {
+    public function update($param)
+    {
         if (is_null($this->table)) {
             die('table is null');
         }
         if (is_null($param)) {
             die('update param is null');
         }
-        $sql = 'UPDATE `'. $this->table .'` SET ';
+        $sql = 'UPDATE `' . $this->table . '` SET ';
         foreach ($param as $k => $v) {
-            $sql.= '`' . $k . '`=?';
+            $sql .= '`' . $k . '`=?';
         }
         $val = array_values($param);
         unset($param);
         if (!is_null($this->where)) {
-            $sql.= ' WHERE ' . $this->getWhere();
+            $sql .= ' WHERE ' . $this->getWhere();
         }
         if (!is_null($this->group)) {
-            $sql .= ' GROUP BY '.$this->group;
+            $sql .= ' GROUP BY ' . $this->group;
         }
         if (!is_null($this->order)) {
-            $sql .= ' ORDER BY '.implode(',', $this->order);
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
         }
         if (!is_null($this->limit)) {
-            $sql.= ' LIMIT ' . $this->limit;
+            $sql .= ' LIMIT ' . $this->limit;
         }
         echo $sql . '<br>';
         $stmt = $this->pdo->prepare($sql);
@@ -538,28 +580,28 @@ class DB extends Base {
     /**
      * 删除记录
      */
-    public function delete() {
+    public function delete()
+    {
         if (is_null($this->table)) {
             die('table is null');
         }
-        $sql = 'DELETE FROM `'. $this->table .'`';
+        $sql = 'DELETE FROM `' . $this->table . '`';
         if (!is_null($this->where)) {
-            $sql.= ' WHERE ' . $this->getWhere();
+            $sql .= ' WHERE ' . $this->getWhere();
         }
         if (!is_null($this->group)) {
-            $sql .= ' GROUP BY '.$this->group;
+            $sql .= ' GROUP BY ' . $this->group;
         }
         if (!is_null($this->order)) {
-            $sql .= ' ORDER BY '.implode(',', $this->order);
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
         }
         if (!is_null($this->limit)) {
-            $sql.= ' LIMIT ' . $this->limit;
+            $sql .= ' LIMIT ' . $this->limit;
         }
         echo $sql . '<br>';
         try {
             return $this->pdo->exec($sql);
-        }
-        catch(PDOException $e) {
+        } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
     }
@@ -568,27 +610,29 @@ class DB extends Base {
      * 清空表
      * 快速清空数据库内指定表内容的 SQL 语句，不保留日志，无法恢复数据，速度也是最快的，比 DELETE 删除方式快非常多。
      */
-    public function clear() {
+    public function clear()
+    {
         if (is_null($this->table)) {
             dle('table is null');
         }
         $sql = 'TRUNCATE TABLE `' . $this->table . '`';
         try {
             return $this->pdo->exec($sql);
-        }
-        catch(PDOException $e) {
+        } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
     }
 
-    public function lastInsertId() {
+    public function lastInsertId()
+    {
         return $this->pdo->lastInsertId();
     }
 
     /**
      * 去重查询
      */
-    public function distinct($param) {
+    public function distinct($param)
+    {
         if (is_null($this->table)) {
             dle('table is null');
         }
@@ -597,16 +641,16 @@ class DB extends Base {
         }
         $sql = 'SELECT DISTINCT(' . $param . ') FROM `' . $this->table . '`';
         if (!is_null($this->where)) {
-            $sql .= ' WHERE '.$this->getWhere();
+            $sql .= ' WHERE ' . $this->getWhere();
         }
         if (!is_null($this->group)) {
-            $sql .= ' GROUP BY '.$this->group;
+            $sql .= ' GROUP BY ' . $this->group;
         }
         if (!is_null($this->order)) {
-            $sql .= ' ORDER BY '.implode(',', $this->order);
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
         }
         if (!is_null($this->limit)) {
-            $sql .= ' LIMIT '.$this->limit;
+            $sql .= ' LIMIT ' . $this->limit;
         }
         return $this->query($sql);
     }
@@ -614,7 +658,8 @@ class DB extends Base {
     /**
      * 绑定参数
      */
-    public function bind($param) {
+    public function bind($param)
+    {
         foreach ($param as $key => $val) {
             $this->param[$key] = $val;
         }
@@ -623,7 +668,8 @@ class DB extends Base {
     /**
      * 执行事务
      */
-    public function trans() {
+    public function trans()
+    {
         try {
             //$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->beginTransaction();
@@ -631,8 +677,7 @@ class DB extends Base {
             $this->exec();
             $this->exec();
             $this->pdo->commit();
-        }
-        catch(Exception $e) {
+        } catch (Exception $e) {
             $this->pdo->rollBack();
             die('Exception: ' . $e->getMessage());
         }
