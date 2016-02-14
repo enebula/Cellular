@@ -30,16 +30,8 @@ class Model extends DB
      */
     protected function count()
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
+
         $sql = 'SELECT COUNT(*) FROM `' . $this->table . '`';
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
-        }
         return $this->column($sql);
     }
 
@@ -48,16 +40,7 @@ class Model extends DB
      */
     protected function max($field)
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
         $sql = 'SELECT MAX(`' . $field . '`) FROM `' . $this->table . '`';
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
-        }
         return $this->column($sql);
     }
 
@@ -66,16 +49,7 @@ class Model extends DB
      */
     protected function min($field)
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
         $sql = 'SELECT MIN(`' . $field . '`) FROM `' . $this->table . '`';
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
-        }
         return $this->column($sql);
     }
 
@@ -84,16 +58,7 @@ class Model extends DB
      */
     protected function avg($field)
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
         $sql = 'SELECT AVG(`' . $field . '`) FROM `' . $this->table . '`';
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
-        }
         return $this->column($sql);
     }
 
@@ -102,16 +67,7 @@ class Model extends DB
      */
     protected function sum($field)
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
         $sql = 'SELECT SUM(`' . $field . '`) FROM `' . $this->table . '`';
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
-        }
         return $this->column($sql);
     }
 
@@ -120,22 +76,10 @@ class Model extends DB
      */
     protected function increment($field, $num = 1)
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
         if (!is_numeric($num)) {
             die('num is not numeric');
         }
         $sql = 'UPDATE `' . $this->table . '` SET `' . $field . '` = `' . $field . '` + ' . $num;
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->order)) {
-            $sql .= ' ORDER BY ' . implode(',', $this->order);
-        }
-        if (!is_null($this->limit)) {
-            $sql .= ' LIMIT ' . $this->limit;
-        }
         return $this->exec($sql);
     }
 
@@ -144,28 +88,10 @@ class Model extends DB
      */
     protected function decrement($field, $num = 1)
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
-        if (!is_numeric($num)) {
-            die('num is not numeric');
-        }
-        if (is_null($this->table)) {
-            die('table is null');
-        }
         if (!is_numeric($num)) {
             die('num is not numeric');
         }
         $sql = 'UPDATE `' . $this->table . '` SET `' . $field . '` = `' . $field . '` - ' . $num;
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->order)) {
-            $sql .= ' ORDER BY ' . implode(',', $this->order);
-        }
-        if (!is_null($this->limit)) {
-            $sql .= ' LIMIT ' . $this->limit;
-        }
         return $this->exec($sql);
     }
 }

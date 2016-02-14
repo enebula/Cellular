@@ -12,7 +12,7 @@ class DB extends Base
 {
     private $pdo;
     private $prefix;
-    private $table;
+    public $table; // Model use this
     private $param; // sql parameter
     private $stmt; // sql statement
     private $where;
@@ -482,6 +482,21 @@ class DB extends Base
      */
     public function column($sql)
     {
+        if (is_null($this->table)) {
+            die('table is null');
+        }
+        if (!is_null($this->where)) {
+            $sql .= ' WHERE ' . $this->getWhere();
+        }
+        if (!is_null($this->group)) {
+            $sql .= ' GROUP BY ' . $this->group;
+        }
+        if (!is_null($this->order)) {
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
+        }
+        if (!is_null($this->limit)) {
+            $sql .= ' LIMIT ' . $this->limit;
+        }
         echo $sql . '<br>';
         try {
             $this->stmt = $this->pdo->prepare($sql);
