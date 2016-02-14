@@ -1,7 +1,7 @@
 <?php
 /**
  * Cellular Framework
- * cart 购物车类
+ * Cart 购物车类
  * @copyright Cellular Team
  */
 namespace core;
