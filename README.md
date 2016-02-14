@@ -10,7 +10,7 @@
 
 <h3>引用Cellular框架</h3>
 
-<p>方法说明<p>
+<p><h5>方法说明</h5><p>
 <pre>
 # 引入框核心文件
 include('/Cellular/init.php');
@@ -25,9 +25,9 @@ Cellular::debug('development');
 Cellular::application($path);
 </pre>
 
-<p>引用示例<p>
+<p><h5>引用示例</h5><p>
 <pre>
-# 示例1: 一个入口文件对应一个应用
+# <b>示例1: 一个入口文件对应一个应用</b>
 # nginx配置
 if (!-f $request_filename) {
     rewrite ^/(.*) /app1/index.php?uri=$1 last;
@@ -36,7 +36,7 @@ if (!-f $request_filename) {
 include('../Cellular/init.php');
 Cellular::application();
 
-# 示例2: 一个入口文件对应一个应用，应用程序在web服务器目录之外
+# <b>示例2: 一个入口文件对应一个应用，应用程序在web服务器目录之外</b>
 # nginx配置
 if (!-f $request_filename) {
     rewrite ^/(.*) /app1/index.php?uri=$1 last;
@@ -45,7 +45,7 @@ if (!-f $request_filename) {
 include('Cellular/init.php');
 Cellular::application('/opt/app1');
 
-# 示例3: 一个入口文件对应多个应用
+# <b>示例3: 一个入口文件对应多个应用</b>
 # nginx配置
 if (!-f $request_filename) {
     rewrite ^/(.*) /index.php?uri=$1 last;
@@ -54,7 +54,7 @@ if (!-f $request_filename) {
 include('Cellular/init.php');
 Cellular::application();
 
-# 示例4: 一个入口文件对应多个应用，应用程序在web服务器目录之外
+# <b>示例4: 一个入口文件对应多个应用，应用程序在web服务器目录之外</b>
 # nginx配置
 if (!-f $request_filename) {
     rewrite ^/(.*) /index.php?uri=$1 last;
