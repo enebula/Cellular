@@ -1,7 +1,7 @@
 <?php
 /**
  * Cellular Framework
- * Mongo 类
+ * Mongo Class
  * @copyright Cellular Team
  */
 namespace core;

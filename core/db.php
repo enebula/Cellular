@@ -1,8 +1,8 @@
 <?php
 /**
+ * Cellular Framework
  * DB - PDO Database Class
- * @author cloud 66999882@qq.com
- * @version 1.0 2016-01-28
+ * @copyright Cellular Team
  */
 
 namespace core;

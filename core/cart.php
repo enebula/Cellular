@@ -1,12 +1,8 @@
 <?php
 /**
- *
  * Cellular Framework
  * cart 购物车类
- *
- * @author Cloud 66999882@qq.com
- * @version 1.0 2016-02-03
- *
+ * @copyright Cellular Team
  */
 namespace core;
 

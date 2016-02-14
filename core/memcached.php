@@ -1,7 +1,7 @@
 <?php
 /**
  * Cellular Framework
- * Memcached 类
+ * Memcached Class
  * @copyright Cellular Team
  */
 namespace core;
