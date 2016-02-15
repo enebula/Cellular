@@ -45,7 +45,7 @@ class DB extends Base
      */
     private function connect()
     {
-        $config = $this->config('mysql');
+        $config = $this->config('db');
         $this->prefix = $config['prefix'];
         $dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['database'];
         try {
