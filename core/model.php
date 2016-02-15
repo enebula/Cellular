@@ -32,7 +32,7 @@ class Model extends DB
      */
     public function count($field = null)
     {
-        $sql = ($field !== null) ? 'COUNT(`'. $field .'`)' : 'COUNT(*)';
+        $sql = ($field !== null) ? 'COUNT('. $field .')' : 'COUNT(*)';
         return $this->column($sql);
     }
 
@@ -41,7 +41,7 @@ class Model extends DB
      */
     public function max($field)
     {
-        return $this->column('MAX(`'. $field .'`)');
+        return $this->column('MAX('. $field .')');
     }
 
     /**
@@ -49,7 +49,7 @@ class Model extends DB
      */
     public function min($field)
     {
-        return $this->column('MIN(`'. $field .'`)');
+        return $this->column('MIN('. $field .')');
     }
 
     /**
@@ -57,7 +57,7 @@ class Model extends DB
      */
     public function avg($field)
     {
-        return $this->column('AVG(`'. $field .'`)');
+        return $this->column('AVG('. $field .')');
     }
 
     /**
@@ -65,7 +65,15 @@ class Model extends DB
      */
     public function sum($field)
     {
-        return $this->column('SUM(`'. $field .'`)');
+        return $this->column('SUM('. $field .')');
+    }
+
+    /**
+     * 去重查询
+     */
+    public function distinct($param)
+    {
+        return $this->column('DISTINCT('. $field .')');
     }
 
     /**
