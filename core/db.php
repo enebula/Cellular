@@ -676,7 +676,6 @@ class DB extends Base
         } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
-
     }
 
     /**
@@ -689,8 +688,6 @@ class DB extends Base
         } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
-
     }
-
 }
 ?>
