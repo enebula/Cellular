@@ -77,7 +77,7 @@ class DB extends Base
                         ',' => '`,`',
                         '.' => '`.`'
                     );
-                    return '`'. strtr($value, $format) .'`';
+                    return '`' . strtr($value, $format) . '`';
                 }
             }
         }
@@ -489,7 +489,7 @@ class DB extends Base
 
     protected function query($sql)
     {
-        $this->debug[] = 'SQL:'.$sql;
+        $this->debug[] = 'SQL:' . $sql;
         if (is_null($this->param)) {
             try {
                 $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
@@ -574,8 +574,8 @@ class DB extends Base
             $this->param[] = $v;
         }
         unset($param);
-        $sql = 'INSERT INTO `'. $this->table .'` ('. substr($key, 1) .') VALUES ('. substr($value, 1) .')';
-        $this->debug[] = 'SQL:'.$sql;
+        $sql = 'INSERT INTO `' . $this->table . '` (' . substr($key, 1) . ') VALUES (' . substr($value, 1) . ')';
+        $this->debug[] = 'SQL:' . $sql;
         if ($this->query($sql)) {
             return $this->pdo->lastInsertId();
         }
@@ -612,7 +612,7 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        $this->debug[] = 'SQL:'.$sql;
+        $this->debug[] = 'SQL:' . $sql;
         return $this->query($sql);
     }
 
@@ -637,7 +637,7 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        $this->debug[] = 'SQL:'.$sql;
+        $this->debug[] = 'SQL:' . $sql;
         $this->exec($sql);
     }
 
@@ -650,27 +650,46 @@ class DB extends Base
         if (is_null($this->table)) {
             dle('table is null');
         }
-        $sql = 'TRUNCATE TABLE `'. $this->table .'`';
+        $sql = 'TRUNCATE TABLE `' . $this->table . '`';
         $this->exec($sql);
     }
 
-
     /**
-     * 执行事务
+     * 启动事务
      */
     public function trans()
     {
         try {
-            //$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->beginTransaction();
-            $this->exec();
-            $this->exec();
-            $this->exec();
-            $this->pdo->commit();
-        } catch (Exception $e) {
-            $this->pdo->rollBack();
-            die('Exception: ' . $e->getMessage());
+        } catch (PDOException $e) {
+            die('PDOException: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * 提交事务
+     */
+    public function commit()
+    {
+        try {
+            $this->pdo->commit();
+        } catch (PDOException $e) {
+            die('PDOException: ' . $e->getMessage());
+        }
+
+    }
+
+    /**
+     * 回滚事务
+     */
+    public function rollBack()
+    {
+        try {
+            $this->pdo->rollBack();
+        } catch (PDOException $e) {
+            die('PDOException: ' . $e->getMessage());
+        }
+
     }
 
 }
