@@ -8,7 +8,8 @@
  *
  */
 
-class Cellular {
+class Cellular
+{
 
 	private static $frameworkPath; //框架根目录
 	private static $appPath; //应用程序根目录
@@ -228,6 +229,23 @@ class Cellular {
 	public static function config($name)
 	{
 		$path = self::$appStruct['config'].DIRECTORY_SEPARATOR.$name.'.php';
+		return self::loadFile($path);
+	}
+
+	/**
+	 * 加载模型
+	 */
+	public static function model($name)
+	{
+		self::loadClass(self::$appStruct['model'].'.'.$name, $name);
+	}
+
+	/**
+	 * 加载试图
+	 */
+	public static function view($name)
+	{
+		$path = self::$appStruct['view'].DIRECTORY_SEPARATOR.$name.'.php';
 		return self::loadFile($path);
 	}
 

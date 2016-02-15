@@ -33,8 +33,7 @@ class Controller extends Base {
 	{
 		if (null === $this->model) $this->model = new \stdClass();
 		if (!isset($this->model->$name)) {
-			$class = Cellular::getAppStruct('model'). '.' .$name;
-			$this->model->$name = Cellular::loadClass($class);
+			$this->model->$name = Cellular::model($name);
 		}
 	}
 
@@ -52,9 +51,8 @@ class Controller extends Base {
 	protected function display($name)
 	{
 		if ($this->viewData) extract($this->viewData);
-		$file = Cellular::$appStruct['view']. '/' .$name.'.php';
 		ob_start(); //开启缓冲区
-		Cellular::loadFile($file);
+		Cellular::view($name);
 		$this->viewCache = ob_get_contents();
 		ob_end_flush(); //关闭缓存并清空
 	}

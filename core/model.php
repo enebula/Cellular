@@ -11,101 +11,84 @@ class Model extends DB
     public $table;
 
     /**
-     * Model constructor.
-     * @param null $table
+     * 构造函数
      */
-    public function __construct($table = null)
+    function __construct($table)
     {
-        if (!is_null($table)) {
-            $this->table = $table;
-        }
-    }
-
-    /**
-     * 取出所有记录
-     */
-    protected function all()
-    {
-        $sql = 'SELECT * FROM `' . $this->table . '`';
-        return $this->query($sql);
+        parent::__construct();
+        $this->table($table);
     }
 
     /**
      * 根据主键取出一条数据
      */
-    protected function find($id)
+    public function find($id)
     {
-        $sql = 'SELECT * FROM `' . $this->table . '` WHERE `id` = \'' . $id . '\'';
-        return $this->query($sql);
+        return $this->where('id', $id)->first();
     }
 
     /**
      * 行数统计
      */
-    protected function count()
+    public function count($field = null)
     {
-
-        $sql = 'SELECT COUNT(*) FROM `' . $this->table . '`';
+        $sql = ($field !== null) ? 'COUNT(`'. $field .'`)' : 'COUNT(*)';
         return $this->column($sql);
     }
 
     /**
      * 最大值
      */
-    protected function max($field)
+    public function max($field)
     {
-        $sql = 'SELECT MAX(`' . $field . '`) FROM `' . $this->table . '`';
-        return $this->column($sql);
+        return $this->column('MAX(`'. $field .'`)');
     }
 
     /**
      * 最小值
      */
-    protected function min($field)
+    public function min($field)
     {
-        $sql = 'SELECT MIN(`' . $field . '`) FROM `' . $this->table . '`';
-        return $this->column($sql);
+        return $this->column('MIN(`'. $field .'`)');
     }
 
     /**
      * 平均值
      */
-    protected function avg($field)
+    public function avg($field)
     {
-        $sql = 'SELECT AVG(`' . $field . '`) FROM `' . $this->table . '`';
-        return $this->column($sql);
+        return $this->column('AVG(`'. $field .'`)');
     }
 
     /**
      * 累加值
      */
-    protected function sum($field)
+    public function sum($field)
     {
-        $sql = 'SELECT SUM(`' . $field . '`) FROM `' . $this->table . '`';
-        return $this->column($sql);
+        return $this->column('SUM(`'. $field .'`)');
     }
 
     /**
      * 自增值
      */
-    protected function increment($field, $num = 1)
+    public function increment($field, $num = 1)
     {
         if (!is_numeric($num)) {
             die('num is not numeric');
         }
-        $sql = 'UPDATE `' . $this->table . '` SET `' . $field . '` = `' . $field . '` + ' . $num;
+        $sql = 'UPDATE `'. $this->table .'` SET `'. $field .'` = `'. $field .'` + '. $num;
         return $this->exec($sql);
     }
 
     /**
      * 自减值
      */
-    protected function decrement($field, $num = 1)
+    public function decrement($field, $num = 1)
     {
         if (!is_numeric($num)) {
             die('num is not numeric');
         }
-        $sql = 'UPDATE `' . $this->table . '` SET `' . $field . '` = `' . $field . '` - ' . $num;
+        $sql = 'UPDATE `'. $this->table .'` SET `'. $field .'` = `'. $field .'` - '. $num;
         return $this->exec($sql);
     }
 }

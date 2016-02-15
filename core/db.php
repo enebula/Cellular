@@ -10,19 +10,19 @@ use PDOException;
 
 class DB extends Base
 {
+    protected $table;
+    private $query = 0; // 查询次数
+    private $execute = 0; // 执行次数
     private $pdo;
-    private $prefix;
-    private $table;
-    private $param; // sql parameter
     private $stmt; // sql statement
+    private $param; // sql parameter
+    private $prefix;
     private $where;
     private $whereChild;
     private $group;
     private $order;
     private $limit;
-    private $sql;
-    protected $query = 0; // 查询次数
-    protected $execute = 0; // 执行次数
+    private $join;
 
     /**
      * 构造函数
@@ -436,75 +436,9 @@ class DB extends Base
         return $this;
     }
 
-    public function query($sql)
-    {
-        echo $sql . '<br>';
-        if (is_null($this->param)) {
-            try {
-                $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                die('PDOException: ' . $e->getMessage());
-            }
-            return $this->stmt->fetchAll();
-        } else {
-            try {
-                $this->stmt = $this->pdo->prepare($sql);
-                $this->stmt->execute($this->param);
-                echo ':' . $this->stmt->debugDumpParams() . '<br>';
-            } catch (PDOException $e) {
-                die('PDOException: ' . $e->getMessage());
-            }
-            return $this->stmt->fetchAll();
-        }
-    }
-
     /**
-     * 查询一条记录
+     * 查询记录
      */
-    public function first()
-    {
-        // PDO - fetch()
-    }
-
-    /**
-     * 返回受影响的行数
-     * @param $sql
-     */
-    public function exec($sql)
-    {
-        return $this->pdo->exec($sql);
-    }
-
-    /**
-     * 查询一条数据中的一列
-     */
-    public function column($sql)
-    {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
-        }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
-        }
-        if (!is_null($this->order)) {
-            $sql .= ' ORDER BY ' . implode(',', $this->order);
-        }
-        if (!is_null($this->limit)) {
-            $sql .= ' LIMIT ' . $this->limit;
-        }
-        echo $sql . '<br>';
-        try {
-            $this->stmt = $this->pdo->prepare($sql);
-            $this->stmt->execute();
-        } catch (PDOException $e) {
-            die('PDOException: ' . $e->getMessage());
-        }
-        return $this->stmt->fetchColumn();
-    }
-
     public function select($param = null)
     {
         if (is_null($this->table)) {
@@ -559,10 +493,13 @@ class DB extends Base
         }
         $val = array_values($param);
         unset($param);
-        $sql = 'INSERT INTO `' . $this->table . '` (' . substr($key, 1) . ')' . ' VALUES (' . substr($value, 1) . ')';
+        $sql = 'INSERT INTO `'. $this->table .'` ('. substr($key, 1) .') VALUES ('. substr($value, 1) .')';
         echo $sql . '<br>';
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($val);
+        if ($stmt->execute($val)) {
+            return $this->pdo->lastInsertId();
+        }
+        return false;
     }
 
     /**
@@ -645,11 +582,6 @@ class DB extends Base
         }
     }
 
-    public function lastInsertId()
-    {
-        return $this->pdo->lastInsertId();
-    }
-
     /**
      * 去重查询
      */
@@ -687,6 +619,93 @@ class DB extends Base
         }
     }
 
+    protected function query($sql)
+    {
+        echo $sql . '<br>';
+        if (is_null($this->param)) {
+            try {
+                $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                die('PDOException: ' . $e->getMessage());
+            }
+            return $this->stmt->fetchAll();
+        } else {
+            try {
+                $this->stmt = $this->pdo->prepare($sql);
+                $this->stmt->execute($this->param);
+                echo ':' . $this->stmt->debugDumpParams() . '<br>';
+            } catch (PDOException $e) {
+                die('PDOException: ' . $e->getMessage());
+            }
+            return $this->stmt->fetchAll();
+        }
+    }
+
+    /**
+     * 查询一条数据中的一列
+     */
+    protected function column($param)
+    {
+        if (is_null($this->table)) {
+            die('table is null');
+        }
+        $sql = 'SELECT '. $param .' FROM `'. $this->table .'`';
+        if (!is_null($this->where)) {
+            $sql .= ' WHERE ' . $this->getWhere();
+        }
+        if (!is_null($this->group)) {
+            $sql .= ' GROUP BY ' . $this->group;
+        }
+        if (!is_null($this->order)) {
+            $sql .= ' ORDER BY ' . implode(',', $this->order);
+        }
+        if (!is_null($this->limit)) {
+            $sql .= ' LIMIT ' . $this->limit;
+        }
+        echo $sql . '<br>';
+        try {
+            $this->stmt = $this->pdo->prepare($sql);
+            $this->stmt->execute();
+        } catch (PDOException $e) {
+            die('PDOException: ' . $e->getMessage());
+        }
+        return $this->stmt->fetchColumn();
+    }
+
+    /**
+     * 查询一条记录
+     */
+    protected function first()
+    {
+        echo $sql . '<br>';
+        if (is_null($this->param)) {
+            try {
+                $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                die('PDOException: ' . $e->getMessage());
+            }
+            return $this->stmt->fetch();
+        } else {
+            try {
+                $this->stmt = $this->pdo->prepare($sql);
+                $this->stmt->execute($this->param);
+                echo ':' . $this->stmt->debugDumpParams() . '<br>';
+            } catch (PDOException $e) {
+                die('PDOException: ' . $e->getMessage());
+            }
+            return $this->stmt->fetch(PDO::FETCH_ASSOC);
+        }
+    }
+
+    /**
+     * 返回受影响的行数
+     * @param $sql
+     */
+    protected function exec($sql)
+    {
+        return $this->pdo->exec($sql);
+    }
+
     /**
      * 执行事务
      */
@@ -704,5 +723,12 @@ class DB extends Base
             die('Exception: ' . $e->getMessage());
         }
     }
+
+    public function lastInsertId()
+    {
+        return $this->pdo->lastInsertId();
+    }
+
+
 }
 ?>
