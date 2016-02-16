@@ -71,18 +71,20 @@ class Cellular
 	 */
 	public static function application($path = null)
 	{
+
 		self::$frameworkPath = dirname(__FILE__).DIRECTORY_SEPARATOR;
 		self::$appPath = ($path == null) ? './' : $path;
 		//获取uri
-		if (self::getURI()) {
+		if (self::parseURI()) {
 			//加载应用配置文件
 			self::$config = self::config('app');
+			//定义静态资源常量
+			define('STARTTIME', microtime(true));
+			define('WEBROOTPATH', self::$webRootPath);
+			define('ASSETS', empty(self::$config['assets_path']) ? self::$assetsPath.DIRECTORY_SEPARATOR.self::$appStruct['assets'] : self::$config['assets_path']);
 			//设置默认时区
 			if (isset(self::$config['timezone'])) date_default_timezone_set(self::$config['timezone']);
-			//定义静态资源常量
-			define('WEBROOTPATH', self::$webRootPath);
-			define('ASSETS', empty(self::$config['assets_path']) ? self::$assetsPath : self::$config['assets_path']);
-			//启动转发器
+			//控制器转发
 			if (!self::hub()) {
 				self::error(self::$errorMsg['code'], self::$errorMsg['msg']);
 			}
@@ -91,7 +93,7 @@ class Cellular
 		}
 	}
 
-	private static function getURI()
+	private static function parseURI()
 	{
 		//获取请求资源ID
 		$requestURI = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
@@ -109,19 +111,23 @@ class Cellular
 			);
 			return false;
 		}
+		//解析请求URI字符串
 		if ($requestURI != '') {
-			$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?')); //过滤参数
+			//过滤GET参数
+			$removeParamURI = substr($requestURI, 0, strpos($requestURI, '?'));
 			$requestURI = isset($removeParamURI{0}) ? $removeParamURI : $requestURI;
+			//字符串转数组
 			$request = explode('/', $requestURI);
+			//去除空数组
 			$request = array_filter($request);
-			//通过URI获取应用名
+			//获取应用名，当一个入口下有多个应用时有效
 			foreach ($request as $key => $value) {
 				if (!is_dir(self::$appPath.$value)) break;
 				self::$appPath .= $value.DIRECTORY_SEPARATOR;
+				self::$webRootPath .= DIRECTORY_SEPARATOR.$value;
 				self::$assetsPath .= DIRECTORY_SEPARATOR.$value;
 				unset($request[$key]);
 			}
-			self::$assetsPath .= DIRECTORY_SEPARATOR.self::$appStruct['assets'];
 			self::$URI = $request;
 		}
 		return true;
@@ -237,16 +243,22 @@ class Cellular
 	 */
 	public static function model($name)
 	{
-		self::loadClass(self::$appStruct['model'].'.'.$name, $name);
+		$model = self::loadClass(self::$appStruct['model'].'.'.$name, $name);
+		if ($model != false) return $model;
+		return self::loadClass('core.model', $name);
 	}
 
 	/**
 	 * 加载试图
 	 */
-	public static function view($name)
+	public static function view($name, $value)
 	{
+		if ($value) extract($value);
 		$path = self::$appStruct['view'].DIRECTORY_SEPARATOR.$name.'.php';
-		return self::loadFile($path);
+		if ($path = self::getFilePath($path)) {
+			return include_once($path);
+		}
+		return false;
 	}
 
 	/**

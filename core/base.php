@@ -22,7 +22,7 @@ class Base {
     protected function loadClass($className, $param = null)
     {
         if (null === $this->class) $this->class = new \stdClass();
-        $name = strtr(strtolower($className), '.', '_');
+        $name = strtr(strtolower(str_replace('core.', '', $className)), '.', '_');
         if (!isset($this->class->$name)) {
             $this->class->$name = Cellular::loadClass($className, $param);
         }

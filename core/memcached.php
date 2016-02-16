@@ -5,8 +5,11 @@
  * @copyright Cellular Team
  */
 namespace core;
+use Memcached;
+use Cellular;
 
-class Memcached {
+class Memcached extends Base
+{
 
     public function __construct($config) {
         $this->connect();
@@ -16,7 +19,7 @@ class Memcached {
      * 连接数据库
      */
     private function connect() {
-      $config = Cellular::loadFile('config/memcached.php');
+      $config = $this->config('memcached');
       $mc = new Memcached();
       $mc->addServer($config['host'], $config['port']);
   		return $mc;

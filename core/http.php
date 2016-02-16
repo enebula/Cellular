@@ -10,12 +10,13 @@
  */
 
 namespace core;
+use curl_init;
 
 class http {
 
     public function get($url, $port = 80)
     {
-        $curl = \curl_init();
+        $curl = new curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         //curl_setopt($curl, CURLOPT_PORT, $port);
         //curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); //跳过SSL检查
@@ -32,7 +33,7 @@ class http {
 
     public function post($url, $value, $port = 80)
     {
-        $curl = \curl_init();
+        $curl = new curl_init();
         curl_setopt($curl, CURLOPT_URL, $url);
         //curl_setopt($curl, CURLOPT_PORT, $port);
         //curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); //跳过SSL检查

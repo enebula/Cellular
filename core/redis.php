@@ -10,8 +10,11 @@
  */
 
 namespace core;
+use Redis;
+use Cellular;
 
-class Redis extends Base {
+class Redis extends Base
+{
 
     private $redis;
     private $config;
@@ -21,7 +24,7 @@ class Redis extends Base {
     {
         $this->config = $this->config('redis');
         $this->db = 0;
-        $this->redis = new \Redis();
+        $this->redis = new Redis();
         $this->redis->connect($this->config['host'], $this->config['port']);
     }
 

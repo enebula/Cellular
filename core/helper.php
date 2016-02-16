@@ -12,7 +12,6 @@
 namespace core;
 
 class Helper {
-
     /**
     * 加载实例类
     */
@@ -48,11 +47,64 @@ class Helper {
     /**
      * URI生成
      */
-    public static function URL($url, $param)
+    public static function URL($controller = null, $action = null, $param = null)
     {
-
+        $url = WEBROOTPATH;
+        if ($controller != null) {
+            $url .= DIRECTORY_SEPARATOR.$controller;
+        }
+        if ($action != null) {
+            $url .= DIRECTORY_SEPARATOR.$action;
+        }
+        if ($param != null) {
+            $url .= DIRECTORY_SEPARATOR.'?';
+            $_var = null;
+            foreach ($param as $key => $value) {
+                $_var .= '&'.$key.'='.$value;
+            }
+            $url .= substr($_var, 1);
+        }
+        return $url;
     }
 
+    public static function location($controller = null, $action = null, $param = null)
+    {
+        header('location: '.self::URL($controller, $action, $param));
+        exit();
+    }
+
+
+    public static function UUID()
+    {
+        //有重复的可能行，建议谨慎使用
+        return md5(uniqid(md5(microtime(true)),true));
+    }
+
+    /**
+     * 获取访问IP
+     * @return string IP地址
+     */
+    public static function ip() {
+    	if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+    	{
+    		$arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+    		$pos = array_search('unknown', $arr);
+    		if(false !== $pos) unset($arr[$pos]);
+    		$ip = trim($arr[0]);
+    	}
+    	elseif(isset($_SERVER['HTTP_CLIENT_IP']))
+    	{
+    		$ip = $_SERVER['HTTP_CLIENT_IP'];
+    	}
+    	elseif (isset($_SERVER['REMOTE_ADDR']))
+    	{
+    		$ip = $_SERVER['REMOTE_ADDR'];
+    	}
+        if (sprintf("%u",ip2long($ip))) {
+            return $ip;
+        }
+        return '0.0.0.0';
+    }
 }
 
 ?>

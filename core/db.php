@@ -51,6 +51,7 @@ class DB extends Base
         $dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['database'];
         try {
             $this->pdo = new PDO($dsn, $config['username'], $config['password']);
+            //$this->pdo = new PDO($dsn, $config['username'], $config['password'], array(PDO::ATTR_PERSISTENT => true));
         } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
@@ -64,7 +65,30 @@ class DB extends Base
         if (!is_null($value)) {
             if (is_array($value)) $value = implode(',', $value);
             if (is_string($value)) {
-                if (strpos($value, '.')) $value = $this->prefix . $value;
+                //给字段的表加前缀
+                if (strpos($value, ',')) {
+                    //处理多个字段
+                    $arr = explode(',', $value);
+                    foreach ($arr as $key => $val) {
+                        if (strpos($val, '.')) $arr[$key] = $this->prefix . $val;
+                    }
+                    $value = implode(',', $arr);
+                } else {
+                    //处理单个字段
+                    if (strpos($value, '.')) $value = $this->prefix . $value;
+                }
+/*
+                if (strpos($value, '.')) {
+                    $sql = explode('.', $value);
+                    $_var = null;
+                    foreach ($sql as $key => $val) {
+                        $_var .= $val.$this->prefix
+                        //$value .= $val.(isset($this->param[$key]) ? '?:['.$this->param[$key].']' : '');
+                    }
+                    //$value = $this->prefix . $value;
+                }
+                */
+                //给字段加引号
                 if (strpos($value, '*') || strpos($value, '`')) return $value;
                 if (strpos($value, '(')) {
                     $format = array(
@@ -95,9 +119,20 @@ class DB extends Base
         $this->limit = null;
     }
 
-    public function debug()
+    public function debug($value = null)
     {
-        return $this->debug;
+        if ($value != null) {
+            if ($this->param) {
+                $sql = explode('?', $value);
+                $value = null;
+                foreach ($sql as $key => $val) {
+                    $value .= $val.(isset($this->param[$key]) ? '?:['.$this->param[$key].']' : '');
+                }
+            }
+            $this->debug[] = $value;
+        } else {
+            return $this->debug;
+        }
     }
 
     public function table($param)
@@ -185,38 +220,38 @@ class DB extends Base
                 } else {
                     switch ($key) {
                         case 'and':
-                            $sql .= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' ' . $param[1] . ' ? ';
                             $this->param[] = $param[2];
                             break;
                         case 'or':
-                            $sql .= ' `' . $param[0] . '` ' . $param[1] . ' ? ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' ' . $param[1] . ' ? ';
                             $this->param[] = $param[2];
                             break;
                         case 'like':
                             $keyword = ($param[2] == 'both') ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
-                            $sql .= ' `' . $param[0] . '` LIKE ' . $keyword . ' ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' LIKE ' . $keyword . ' ';
                             $this->param[] = $param[1];
                             break;
                         case 'notlike':
                             $keyword = $param[2] == 'both' ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
-                            $sql .= ' `' . $param[0] . '` NOT LIKE ' . $keyword . ' ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' NOT LIKE ' . $keyword . ' ';
                             $this->param[] = $param[1];
                             break;
                         case 'between':
-                            $sql .= ' `' . $param[0] . '` BETWEEN ? AND ? ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' BETWEEN ? AND ? ';
                             $this->param[] = $param[1];
                             $this->param[] = $param[2];
                             break;
                         case 'notbetween':
-                            $sql .= ' `' . $param[0] . '` NOT BETWEEN ? AND ? ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' NOT BETWEEN ? AND ? ';
                             $this->param[] = $param[1];
                             $this->param[] = $param[2];
                             break;
                         case 'null':
-                            $sql .= ' `' . $param[0] . '` IS NULL ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' IS NULL ';
                             break;
                         case 'notnull':
-                            $sql .= ' `' . $param[0] . '` IS NOT NULL ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' IS NOT NULL ';
                             break;
                         case 'in':
                             $param[1] = explode(',', $param[1]);
@@ -225,7 +260,7 @@ class DB extends Base
                                 $this->param[] = $value;
                                 $var .= ',?';
                             }
-                            $sql .= ' `' . $param[0] . '` IN(' . substr($var, 1) . ') ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' IN(' . substr($var, 1) . ') ';
                             break;
                         case 'notin':
                             $param[1] = explode(',', $param[1]);
@@ -234,7 +269,7 @@ class DB extends Base
                                 $this->param[] = $value;
                                 $var .= ',?';
                             }
-                            $sql .= ' `' . $param[0] . '` NOT IN(' . substr($var, 1) . ') ';
+                            $sql .= ' ' . $this->formatField($param[0]) . ' NOT IN(' . substr($var, 1) . ') ';
                             break;
                     }
                 }
@@ -489,7 +524,7 @@ class DB extends Base
 
     protected function query($sql)
     {
-        $this->debug[] = 'SQL:' . $sql;
+        $this->debug('SQL:'.$sql);
         if (is_null($this->param)) {
             try {
                 $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
@@ -518,6 +553,7 @@ class DB extends Base
      */
     protected function exec($sql)
     {
+        $this->debug('SQL:'.$sql);
         try {
             return $this->pdo->exec($sql);
         } catch (PDOException $e) {
@@ -575,7 +611,6 @@ class DB extends Base
         }
         unset($param);
         $sql = 'INSERT INTO `' . $this->table . '` (' . substr($key, 1) . ') VALUES (' . substr($value, 1) . ')';
-        $this->debug[] = 'SQL:' . $sql;
         if ($this->query($sql)) {
             return $this->pdo->lastInsertId();
         }
@@ -594,11 +629,12 @@ class DB extends Base
             die('update param is null');
         }
         $sql = 'UPDATE `' . $this->table . '` SET ';
+        $_var = null;
         foreach ($param as $k => $v) {
-            $sql .= '`' . $k . '`=?';
+            $_var .= ', `' . $k . '`=?';
             $this->param[] = $v;
         }
-        $val = array_values($param);
+        $sql .= substr($_var, 1);
         unset($param);
         if (!is_null($this->where)) {
             $sql .= ' WHERE ' . $this->getWhere();
@@ -612,7 +648,6 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        $this->debug[] = 'SQL:' . $sql;
         return $this->query($sql);
     }
 
@@ -637,7 +672,6 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        $this->debug[] = 'SQL:' . $sql;
         $this->exec($sql);
     }
 

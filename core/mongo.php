@@ -5,8 +5,11 @@
  * @copyright Cellular Team
  */
 namespace core;
+use MongoClient;
+use Cellular;
 
-class Mongo {
+class Mongo extends Base
+{
 
     public function __construct($config) {
         $this->connect();
@@ -21,7 +24,7 @@ class Mongo {
      * $m = new MongoClient("mongodb://${username}:${password}@localhost", array("db" => "myDatabase"));
      */
     private function connect() {
-      $config = Cellular::loadFile('config/mongo.php');
+      $config = $this->config('mongo');
       $conn = 'mongodb://';
       if (!is_null($config['username']) && !is_null($config['password']) {
         $conn .= '${' . $config['username'] . '}:${' . $config['password'] . '}@';

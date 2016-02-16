@@ -13,18 +13,11 @@ namespace core;
 use Cellular;
 
 class Controller extends Base {
-
 	protected $model;
 	protected $input;
 	protected $http;
 	private $viewData;
 	private $viewCache;
-
-	public function __construct()
-	{
-		$this->input = $this->loadClass('base.Input');
-		$this->http = $this->loadClass('base.Http');
-	}
 
 	/**
 	 * 加载模型
@@ -40,9 +33,9 @@ class Controller extends Base {
 	/**
 	 * 视图赋值
 	 */
-	protected function assign($variable, $value)
+	protected function assign($name, $value)
 	{
-		$this->viewData[$variable] = $value;
+		$this->viewData[$name] = $value;
 	}
 
 	/**
@@ -50,9 +43,8 @@ class Controller extends Base {
 	 */
 	protected function display($name)
 	{
-		if ($this->viewData) extract($this->viewData);
 		ob_start(); //开启缓冲区
-		Cellular::view($name);
+		Cellular::view($name, $this->viewData);
 		$this->viewCache = ob_get_contents();
 		ob_end_flush(); //关闭缓存并清空
 	}
@@ -64,7 +56,6 @@ class Controller extends Base {
 	{
 		return $this->viewCache;
 	}
-
 }
 
 ?>
