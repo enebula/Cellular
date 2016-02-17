@@ -72,8 +72,14 @@ class DB extends Base
     private function formatField($value)
     {
         if (!is_null($value)) {
-            if (is_array($value)) $value = implode(',', $value);
-            if (is_string($value)) {
+            if (is_array($value)) {
+                $_var = null;
+                foreach ($value as $key => $val) {
+                    # code...$value = implode(',', $value);
+                    $_var .= ',' . $this->formatField($val) . ' as \'' . $key . '\'';
+                }
+                return substr($_var, 1);
+            } elseif (is_string($value)) {
                 //给字段的表加前缀
                 if (strpos($value, ',')) {
                     //处理多个字段
