@@ -17,8 +17,7 @@ class Page
         $result['total'] = $total; //总记录数
         $result['limit'] = $limit; //显示记录数
         $result['total_page'] = ceil($total / $limit); //分页总数
-        if ($result['total_page'] > 1)
-        {
+        if ($result['total_page'] > 1) {
             $result['previous'] = $this->redirect($page - 1, $param); //上页链接
             $result['next'] = $this->redirect($page + 1, $param); //下页链接
             $result['first'] = $this->redirect(1, $param); //首页链接
@@ -40,7 +39,7 @@ class Page
             }
         }
         $temp = array();
-        for ($i=$start; $i<=$end; $i++) $temp[] = intval($i);
+        for ($i = $start; $i <= $end; $i++) $temp[] = intval($i);
         foreach ($temp as $key => $value) $result['step'][$value] = $this->redirect($value, $param);
         return $result;
     }
