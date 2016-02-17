@@ -10,13 +10,11 @@ use PDOException;
 
 class DB extends Base
 {
-    protected $table;
-    private $query = 0; // 查询次数
-    private $execute = 0; // 执行次数
+    private $table;
+    private $prefix;
     private $pdo;
     private $stmt; // sql statement
     private $param; // sql parameter
-    private $prefix;
     private $where;
     private $whereChild;
     private $group;
@@ -24,13 +22,17 @@ class DB extends Base
     private $limit;
     private $join;
     private $debug;
+    private $query = 0; // 查询次数
+    private $execute = 0; // 执行次数
 
     /**
      * 构造函数
      */
     function __construct()
     {
-        $this->connect();
+        $config = $this->config('db');
+        $this->prefix = $config['prefix'];
+        $this->connect($config['host'], $config['port'], $config['database'], $config['username'], $config['password'], $config['charset']);
     }
 
     /**
@@ -44,16 +46,23 @@ class DB extends Base
     /**
      * 连接数据库
      */
-    private function connect()
+    private function connect($host, $port, $db, $username, $password, $charset)
     {
-        $config = $this->config('db');
-        $this->prefix = $config['prefix'];
-        $dsn = 'mysql:host=' . $config['host'] . ';dbname=' . $config['database'];
-        try {
-            $this->pdo = new PDO($dsn, $config['username'], $config['password']);
-            //$this->pdo = new PDO($dsn, $config['username'], $config['password'], array(PDO::ATTR_PERSISTENT => true));
-        } catch (PDOException $e) {
-            die('PDOException: ' . $e->getMessage());
+        static $conn = null;
+        if ($conn != null) {
+            return $this->pdo =& $conn;
+        } else {
+            $dsn = 'mysql:host=' . $host . ';port=' . $port . ';dbname=' . $db;
+            try {
+                $param = array(
+                    //PDO::ATTR_PERSISTENT => true,
+                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'' . $charset . '\'',
+                );
+                $conn = new PDO($dsn, $username, $password, $param);
+                return $this->pdo = $conn;
+            } catch (PDOException $e) {
+                die('PDOException: ' . $e->getMessage() . '; PHP-ERROR:' . $e->getFile() . ' on (' . $e->getLine() . ')');
+            }
         }
     }
 
@@ -77,17 +86,6 @@ class DB extends Base
                     //处理单个字段
                     if (strpos($value, '.')) $value = $this->prefix . $value;
                 }
-/*
-                if (strpos($value, '.')) {
-                    $sql = explode('.', $value);
-                    $_var = null;
-                    foreach ($sql as $key => $val) {
-                        $_var .= $val.$this->prefix
-                        //$value .= $val.(isset($this->param[$key]) ? '?:['.$this->param[$key].']' : '');
-                    }
-                    //$value = $this->prefix . $value;
-                }
-                */
                 //给字段加引号
                 if (strpos($value, '*') || strpos($value, '`')) return $value;
                 if (strpos($value, '(')) {
@@ -306,12 +304,10 @@ class DB extends Base
                     //字符串条件
                     $value = $var[0];
                     break;
-
                 case 2:
                     //等于条件
                     $value = array($var[0], '=', $var[1]);
                     break;
-
                 case 3:
                     //其它条件
                     $value = array($var[0], $var[1], $var[2]);
@@ -338,12 +334,10 @@ class DB extends Base
                     //字符串条件
                     $value = $var[0];
                     break;
-
                 case 2:
                     //等于条件
                     $value = array($var[0], '=', $var[1]);
                     break;
-
                 case 3:
                     //其它条件
                     $value = array($var[0], $var[1], $var[2]);
@@ -364,12 +358,10 @@ class DB extends Base
                 //字符串条件
                 $value = $var[0];
                 break;
-
             case 2:
                 //全匹配
                 $value = array($var[0], $var[1], 'both');
                 break;
-
             case 3:
                 //左匹配或右匹配
                 $var[2] = $var[2] == 'left' ? 'left' : 'right';

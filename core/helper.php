@@ -50,19 +50,24 @@ class Helper {
     public static function URL($controller = null, $action = null, $param = null)
     {
         $url = WEBROOTPATH;
-        if ($controller != null) {
+        if (!empty($controller)) {
             $url .= DIRECTORY_SEPARATOR.$controller;
         }
-        if ($action != null) {
+        if (!empty($action)) {
             $url .= DIRECTORY_SEPARATOR.$action;
         }
-        if ($param != null) {
+        if (!empty($param)) {
             $url .= DIRECTORY_SEPARATOR.'?';
-            $_var = null;
-            foreach ($param as $key => $value) {
-                $_var .= '&'.$key.'='.$value;
+            if (is_array($param)) {
+                $_var = null;
+                foreach ($param as $key => $value) {
+                    $_var .= '&'.$key.'='.$value;
+                }
+                $url .= substr($_var, 1);
+            } else {
+                $url .= $param;
             }
-            $url .= substr($_var, 1);
+
         }
         return $url;
     }

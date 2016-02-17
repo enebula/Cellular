@@ -234,8 +234,12 @@ class Cellular
 	 */
 	public static function config($name)
 	{
-		$path = self::$appStruct['config'].DIRECTORY_SEPARATOR.$name.'.php';
-		return self::loadFile($path);
+		static $_config = array();
+		$path = self::$appStruct['config'].DIRECTORY_SEPARATOR.$name;
+		if (!isset($_config[$path])) {
+			$_config[$path] = self::loadFile($path.'.php');
+		}
+		return $_config[$path];
 	}
 
 	/**
@@ -243,9 +247,12 @@ class Cellular
 	 */
 	public static function model($name)
 	{
-		$model = self::loadClass(self::$appStruct['model'].'.'.$name, $name);
-		if ($model != false) return $model;
-		return self::loadClass('core.model', $name);
+		$model = self::loadClass(self::$appStruct['model'].'.'.$name);
+		if (!$model) {
+			$model = self::loadClass('core.model');
+		}
+		$model->table($name);
+		return $model;
 	}
 
 	/**

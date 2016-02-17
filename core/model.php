@@ -8,17 +8,6 @@ namespace core;
 
 class Model extends DB
 {
-    public $table;
-
-    /**
-     * 构造函数
-     */
-    function __construct($table)
-    {
-        parent::__construct();
-        $this->table($table);
-    }
-
     /**
      * 根据主键取出一条数据
      */
