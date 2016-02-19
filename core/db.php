@@ -585,8 +585,9 @@ class DB extends Base
     public function column($param)
     {
         if ($this->select($param)) {
-            $this->stmt->fetchColumn();
+            return $this->stmt->fetchColumn();
         }
+        return false;
     }
 
     /**
