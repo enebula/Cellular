@@ -464,9 +464,16 @@ class DB extends Base
         $num = func_num_args();
         $var = func_get_args();
         if ($num == 1) {
-            $this->order[] = $var[0];
+            if (is_array($var[0])) {
+                foreach ($var[0] as $key => $val) {
+                    $this->order($key, $val);
+                }
+            } else {
+                $this->order[] = $var[0];
+            }
         } elseif ($num == 2) {
-            $this->order[] = $this->formatField($var[0]) . ' DESC';
+            $sort = $var[1] == 'desc' ? ' DESC' : ' ASC';
+            $this->order[] = $this->formatField($var[0]) . $sort;
         } else {
             die('order param is null');
         }

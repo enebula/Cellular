@@ -190,7 +190,7 @@ class Cellular
 	/**
 	 * 请求错误提示
 	 */
-	private static function error($code, $msg = null)
+	public static function error($code, $msg = null)
 	{
 		$request = self::getFile('error/400.html');
 		$var = array('<header></header>','<p></p>');

@@ -56,6 +56,19 @@ class Controller extends Base {
 	{
 		return $this->viewCache;
 	}
+
+	/**
+	 * 错误请求提示页面
+	 */
+	protected function error($code, $msg)
+	{
+		$codes = array('404', '400');
+		if (in_array($code, $codes)) {
+			Cellular::error($code, $msg);
+		} else {
+			die('Error header code!');
+		}
+	}
 }
 
 ?>
