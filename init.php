@@ -26,6 +26,7 @@ class Cellular
 		'controller' => 'controller',
 		'model' => 'model',
 		'view' => 'view',
+		'class' => 'classes',
 		'config' => 'config',
 		'assets' => 'assets'
 	);
@@ -243,35 +244,9 @@ class Cellular
 	}
 
 	/**
-	 * 加载模型
-	 */
-	public static function model($name)
-	{
-		$model = self::loadClass(self::$appStruct['model'].'.'.$name);
-		if (!$model) {
-			$model = self::loadClass('core.model');
-		}
-		$model->table($name);
-		return $model;
-	}
-
-	/**
-	 * 加载试图
-	 */
-	public static function view($name, $value)
-	{
-		if ($value) extract($value);
-		$path = self::$appStruct['view'].DIRECTORY_SEPARATOR.$name.'.php';
-		if ($path = self::getFilePath($path)) {
-			return include_once($path);
-		}
-		return false;
-	}
-
-	/**
 	 * 获取文件路径
 	 */
-	private static function getFilePath($file)
+	public static function getFilePath($file)
 	{
 		//检查文件名是否安全-防注入
 		if (preg_match("/^[A-Za-z0-9_\-\/.]+$/", $file)) {

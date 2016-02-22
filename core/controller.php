@@ -22,12 +22,26 @@ class Controller extends Base {
 	/**
 	 * 加载模型
 	 */
-	protected function model($name)
+	protected function model()
 	{
 		if (null === $this->model) $this->model = new \stdClass();
-		if (!isset($this->model->$name)) {
-			$this->model->$name = Cellular::model($name);
+		$num = func_num_args();
+		$var = func_get_args();
+		if ($num == 1) {
+			if (isset($this->model->$var[0])) return $this->model->$var[0];
+			if ($model = Cellular::loadClass(Cellular::$appStruct['model'].'.'.$var[0])) {
+				return $this->model->$var[0] = $model->table($var[0]);
+			}
+			if ($model = Cellular::loadClass('core.model')) {
+				return $this->model->$var[0] = $model->table($var[0]);
+			}
+		} elseif($num == 2) {
+			if (isset($this->model->$var[1])) return $this->model->$var[1];
+			if ($model = Cellular::loadClass(Cellular::$appStruct['class'].'.'.$var[0])) {
+				return $this->model->$var[1] = $model->table($var[1]);
+			}
 		}
+		return false;
 	}
 
 	/**
@@ -43,10 +57,15 @@ class Controller extends Base {
 	 */
 	protected function display($name)
 	{
-		ob_start(); //开启缓冲区
-		Cellular::view($name, $this->viewData);
-		$this->viewCache = ob_get_contents();
-		ob_end_flush(); //关闭缓存并清空
+
+		if ($this->viewData) extract($this->viewData);
+		$path = Cellular::$appStruct['view'].DIRECTORY_SEPARATOR.$name.'.php';
+		if ($path = Cellular::getFilePath($path)) {
+			ob_start(); //开启缓冲区
+			include_once($path);
+			$this->viewCache = ob_get_contents();
+			ob_end_flush(); //关闭缓存并清空
+		}
 	}
 
 	/**

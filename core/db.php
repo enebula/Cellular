@@ -300,8 +300,10 @@ class DB extends Base
         $num = func_num_args();
         $var = func_get_args();
         if (is_callable($var[0])) {
-            $this->whereChild = array(); //'and';
-            $var[0]($this);
+            $this->whereChild = array();
+            $func = $var[0];
+            $var[0] = $this;
+            call_user_func_array($func, $var);
             $this->setChildWhere('and');
         } else {
             $value = array();
@@ -331,7 +333,9 @@ class DB extends Base
         if ($num == 0) return $this;
         if (is_callable($var[0])) {
             $this->whereChild = array();
-            $var[0]($this);
+            $func = $var[0];
+            $var[0] = $this;
+            call_user_func_array($func, $var);
             $this->setChildWhere('or');
         } else {
             $value = array();
