@@ -110,6 +110,22 @@ class Helper {
         }
         return '0.0.0.0';
     }
+
+    /**
+     * 字符转义
+     * 列内容如存在半角逗号 , 则用半角双引号 " 将该字段值包含起来
+     * 列内容如存在半角双引号 " 则应替换成两个半角双引号 "" 并用半角双引号 " 将该字段值包含起来
+     * 禁止某些字段被自动转换为十六进制科学计算法 1.在列内容前面加 "\t" 制表符（实测加在前面实际文件中是一个空格 加在后面是tab制表符 2.用双引号 "" 将列包含起来 并在前面加上 = 号 即 ="0123"
+     */
+    public static function escape($str) {
+        if (stripos($str, ',') !== false || stripos($str, '"') !== false) {
+            if (stripos($str, '"') !== false) {
+                $str = str_replace('"', '""', $str);
+            }
+            $str =  '"' . $str . '"';
+        }
+        return $str;
+    }
 }
 
 ?>
