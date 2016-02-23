@@ -13,7 +13,6 @@ namespace core;
 use Cellular;
 
 class Base {
-
     protected $class;
 
     /**
@@ -36,7 +35,6 @@ class Base {
 	{
 		return Cellular::config($name);
 	}
-
 }
 
 ?>
