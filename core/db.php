@@ -189,8 +189,10 @@ class DB extends Base
 
     private function setChildWhere($type)
     {
-        $this->where[][$type] = $this->whereChild;
-        $this->whereChild = null;
+        if (!empty($this->whereChild)) {
+            $this->where[][$type] = $this->whereChild;
+            $this->whereChild = null;
+        }
     }
 
     /**
@@ -682,7 +684,7 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        $this->exec($sql);
+        return $this->exec($sql);
     }
 
     /**
