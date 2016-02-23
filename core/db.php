@@ -441,6 +441,7 @@ class DB extends Base
         $param = is_array($param) ? implode(',', $param) : $param;
         $value = array($field, $param);
         $this->setWhere($value, 'in');
+        //print_r($this->where);
         return $this;
     }
 
