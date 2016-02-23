@@ -66,7 +66,7 @@ class Cellular
 		if (isset(self::$config['timezone'])) date_default_timezone_set(self::$config['timezone']);
 		//获取uri
 		$uri = self::getURI();
-		if (!$uri) self::error('400', 'URI not allowed!');
+		if ($uri === false) self::error('400', 'URI not allowed!');
 		//解析uri
 		if ($uri) $uri = self::parseURI($uri);
 		//定义WEB跟目录常量
