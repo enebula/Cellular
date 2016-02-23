@@ -68,7 +68,7 @@ class Cellular
 		$uri = self::getURI();
 		if (!$uri) self::error('400', 'URI not allowed!');
 		//解析uri
-		$uri = self::parseURI($uri);
+		if ($uri) $uri = self::parseURI($uri);
 		//定义WEB跟目录常量
 		define('WEBROOTPATH', self::$webRootPath);
 		//定义静态资源常量
@@ -90,10 +90,10 @@ class Cellular
 			self::$assetsPath = self::$webRootPath;
 		}
 		//请求资源检查
-		if (preg_match("/^[A-Za-z0-9_\-\/.%&#@]+$/", $uri) && !empty($uri)) {
-			return $uri;
+		if (!preg_match("/^[A-Za-z0-9_\-\/.%&#@]+$/", $uri) && !empty($uri)) {
+			return false;
 		}
-		return false;
+		return $uri;
 	}
 
 	private static function parseURI($uri)
