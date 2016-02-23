@@ -178,21 +178,17 @@ class DB extends Base
      */
     private function setWhere($value, $type)
     {
-        if (!empty($value)) {
-            if (is_array($this->whereChild)) {
-                $this->whereChild[][$type] = $value;
-            } else {
-                $this->where[][$type] = $value;
-            }
+        if (is_array($this->whereChild)) {
+            $this->whereChild[][$type] = $value;
+        } else {
+            $this->where[][$type] = $value;
         }
     }
 
     private function setChildWhere($type)
     {
-        if (!empty($this->whereChild)) {
-            $this->where[][$type] = $this->whereChild;
-            $this->whereChild = null;
-        }
+        $this->where[][$type] = $this->whereChild;
+        $this->whereChild = null;
     }
 
     /**
@@ -205,12 +201,13 @@ class DB extends Base
         foreach ($value as $k => $val) {
             $key = key($val);
             $param = $val[$key];
+            if (empty($param)) continue;
             $exp = array(
                 'and' => 'AND',
                 'or' => 'OR',
             );
             if (0 !== $k) {
-                $sql .= isset($exp[$key]) ? $exp[$key] : 'AND';
+                if (!empty($sql)) $sql .= isset($exp[$key]) ? $exp[$key] : 'AND';
             }
             if (is_array($param)) {
                 if (is_array($param[0])) {
@@ -559,20 +556,6 @@ class DB extends Base
     }
 
     /**
-     * 返回受影响的行数
-     * @param $sql
-     */
-    protected function exec($sql)
-    {
-        $this->debug('SQL:'.$sql);
-        try {
-            return $this->pdo->exec($sql);
-        } catch (PDOException $e) {
-            die('PDOException: ' . $e->getMessage());
-        }
-    }
-
-    /**
      * 查询全部
      */
     public function all($param = null)
@@ -684,7 +667,7 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        return $this->exec($sql);
+        return $this->query($sql);
     }
 
     /**
@@ -697,7 +680,7 @@ class DB extends Base
             dle('table is null');
         }
         $sql = 'TRUNCATE TABLE `' . $this->table . '`';
-        $this->exec($sql);
+        $this->query($sql);
     }
 
     /**
