@@ -10,6 +10,7 @@
  */
 
 namespace core;
+use Cellular;
 
 class Helper {
     /**
@@ -45,31 +46,28 @@ class Helper {
     }
 
     /**
+     * 字符串转换为数组格式
+     */
+    public function strArray($str, $split = ',', $assign = '=')
+    {
+        if ($str) {
+            $arr = array();
+            $temp = strpos($str, $split) ? explode($split, $str) : [$str];
+            foreach ($temp as $value) {
+                $value = explode($assign, $value);
+                $arr[$value[0]] = $value[1];
+            }
+            return $arr;
+        }
+        return null;
+    }
+
+    /**
      * URI生成
      */
     public static function URL($controller = null, $action = null, $param = null)
     {
-        $url = WEBROOTPATH;
-        if (!empty($controller)) {
-            $url .= DIRECTORY_SEPARATOR.$controller;
-        }
-        if (!empty($action)) {
-            $url .= DIRECTORY_SEPARATOR.$action;
-        }
-        if (!empty($param)) {
-            $url .= DIRECTORY_SEPARATOR.'?';
-            if (is_array($param)) {
-                $_var = null;
-                foreach ($param as $key => $value) {
-                    $_var .= '&'.$key.'='.$value;
-                }
-                $url .= substr($_var, 1);
-            } else {
-                $url .= $param;
-            }
-
-        }
-        return $url;
+        return Cellular::getURL($controller, $action, $param);
     }
 
     public static function location($controller = null, $action = null, $param = null)

@@ -65,12 +65,10 @@ class Cellular
 		//设置默认时区
 		if (isset(self::$config['timezone'])) date_default_timezone_set(self::$config['timezone']);
 		//获取uri
-		$uri = self::getURI();
+		$uri = self::URI();
 		if ($uri === false) self::error('400', 'URI not allowed!');
 		//解析uri
 		if ($uri) $uri = self::parseURI($uri);
-		//定义WEB跟目录常量
-		define('WEBROOTPATH', self::$webRootPath);
 		//定义静态资源常量
 		$assets = self::$config['assets'] ? self::$config['assets'] : self::$assetsPath . DIRECTORY_SEPARATOR . self::$config['struct']['assets'];
 		define('ASSETS', $assets);
@@ -79,10 +77,11 @@ class Cellular
 		if (!$result) self::error('404', 'Page not Found!');
 	}
 
-	private static function getURI()
+	private static function URI()
 	{
 		//获取请求资源ID
 		$uri = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
+		unset($_GET['uri']);
 		//获取web根目录，当应用入口不在web根目录时有效
 		self::$webRootPath = substr($_SERVER['DOCUMENT_URI'], 0, strrpos($_SERVER['DOCUMENT_URI'], '/'));
 		if (!empty(self::$webRootPath)) {
@@ -135,7 +134,14 @@ class Cellular
 			if ($uri) {
 				//获取动作
 				$action = array_shift($uri);
-				//解析路由参数...
+				//基本路由参数格式的解析
+				if ($uri) {
+					while (count($uri) > 0) {
+						$key = array_shift($uri);
+						$value = array_shift($uri);
+						$_GET[$key] = $value;
+					}
+				}
 			}
 			//检查动作名是否安全-防注入
 			if (!preg_match("/^[A-Za-z0-9_]+$/", $controller)) {
@@ -159,6 +165,30 @@ class Cellular
 	public static function appStruct()
 	{
 		return self::$config['struct'];
+	}
+
+	/**
+	 * 返回路由格式的URL访问地址
+	 */
+	public static function getURL($controller = null, $action = null, $param = null)
+	{
+		$url = self::$webRootPath;
+        $url .= DIRECTORY_SEPARATOR . (empty($controller) ? self::$config['controller'] : $controller);
+        $url .= DIRECTORY_SEPARATOR . (empty($action) ? self::$config['action'] : $action);
+        if (!empty($param)) {
+            $url .= DIRECTORY_SEPARATOR;
+            if (is_array($param)) {
+                $_var = null;
+                foreach ($param as $key => $value) {
+                    $_var .= '/'.$key.'/'.$value;
+                }
+                $url .= substr($_var, 1);
+            } else {
+                $url .= $param;
+            }
+
+        }
+        return $url;
 	}
 
 	/**
