@@ -139,13 +139,22 @@ class DB extends Base
         }
     }
 
-    public function table($param)
+    public function table($name)
     {
-        if (is_null($param)) {
+        if (is_null($name)) {
             die('table param is null');
         }
-        $this->table = $this->prefix . $param;
+        $this->table = $this->getTable($name);
         return $this;
+    }
+
+    protected function getTable($name = null)
+    {
+        if ($name) {
+            return $this->prefix . $name;
+        } else {
+            return $this->table;
+        }
     }
 
     public function leftJoin()
@@ -537,7 +546,7 @@ class DB extends Base
             try {
                 $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
                 $this->reset();
-                return true;
+                return $this->stmt;
             } catch (PDOException $e) {
                 die('PDOException: ' . $e->getMessage());
             }
@@ -547,7 +556,7 @@ class DB extends Base
                 $this->stmt->execute($this->param);
                 //$this->debug[] = 'DumpParams:'.$this->stmt->debugDumpParams();
                 $this->reset();
-                return true;
+                return $this->stmt;
             } catch (PDOException $e) {
                 die('PDOException: ' . $e->getMessage());
             }
@@ -560,8 +569,8 @@ class DB extends Base
      */
     public function all($param = null)
     {
-        if ($this->select($param)) {
-            return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($result = $this->select($param)) {
+            return $result->fetchAll(PDO::FETCH_ASSOC);
         }
     }
 
@@ -570,8 +579,8 @@ class DB extends Base
      */
     public function first($param = null)
     {
-        if ($this->select($param)) {
-            return $this->stmt->fetch(PDO::FETCH_ASSOC);
+        if ($result = $this->select($param)) {
+            return $result->fetch(PDO::FETCH_ASSOC);
         }
     }
 
@@ -580,8 +589,8 @@ class DB extends Base
      */
     public function column($param)
     {
-        if ($this->select($param)) {
-            return $this->stmt->fetchColumn();
+        if ($result = $this->select($param)) {
+            return $result->fetchColumn();
         }
         return false;
     }
