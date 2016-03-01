@@ -205,8 +205,9 @@ class DB extends Base
      */
     private function getWhere($value = null)
     {
-        $sql = '';
         $value = is_null($value) ? $this->where : $value;
+        if (!$value) return null;
+        $sql = '';
         foreach ($value as $k => $val) {
             $key = key($val);
             $param = $val[$key];
@@ -524,8 +525,9 @@ class DB extends Base
                 }
             }
         }
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
+        $where = $this->getWhere();
+        if ($where) {
+            $sql .= ' WHERE ' . $where;
         }
         if (!is_null($this->group)) {
             $sql .= ' GROUP BY ' . $this->group;
@@ -640,8 +642,9 @@ class DB extends Base
         }
         $sql .= substr($_var, 1);
         unset($param);
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
+        $where = $this->getWhere();
+        if ($where) {
+            $sql .= ' WHERE ' . $where;
         }
         if (!is_null($this->group)) {
             $sql .= ' GROUP BY ' . $this->group;
@@ -664,8 +667,9 @@ class DB extends Base
             die('table is null');
         }
         $sql = 'DELETE FROM `' . $this->table . '`';
-        if (!is_null($this->where)) {
-            $sql .= ' WHERE ' . $this->getWhere();
+        $where = $this->getWhere();
+        if ($where) {
+            $sql .= ' WHERE ' . $where;
         }
         if (!is_null($this->group)) {
             $sql .= ' GROUP BY ' . $this->group;

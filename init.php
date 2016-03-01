@@ -180,7 +180,7 @@ class Cellular
             if (is_array($param)) {
                 $_var = null;
                 foreach ($param as $key => $value) {
-                    $_var .= '/'.$key.'/'.$value;
+                    if (is_numeric($value) || !empty($value)) $_var .= '/'.$key.'/'.$value;
                 }
                 $url .= substr($_var, 1);
             } else {
