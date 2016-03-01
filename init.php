@@ -59,7 +59,7 @@ class Cellular
 	public static function application($path = null)
 	{
 		self::$frameworkPath = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-		self::$appPath = ($path == null) ? './' : $path;
+		self::$appPath = ($path == null) ? './' : $path . DIRECTORY_SEPARATOR;
 		//加载配置参数
 		self::$config = self::config('app');
 		//设置默认时区
@@ -72,6 +72,8 @@ class Cellular
 		//定义静态资源常量
 		$assets = self::$config['assets'] ? self::$config['assets'] : self::$assetsPath . DIRECTORY_SEPARATOR . self::$config['struct']['assets'];
 		define('ASSETS', $assets);
+		//定义试图目录
+		define('VIEWROOT', self::$appPath . self::$config['struct']['view'] . DIRECTORY_SEPARATOR);
 		//控制器转发
 		$result = self::hub($uri, self::$config['struct']['controller'], self::$config['controller'], self::$config['action']);
 		if (!$result) self::error('404', 'Page not Found!');
