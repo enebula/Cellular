@@ -613,6 +613,7 @@ class DB extends Base
         foreach ($param as $k => $v) {
             $key .= ',`' . $k . '`';
             $value .= ',?';
+            if (is_array($v)) $v = implode(',', $v);
             $this->param[] = $v;
         }
         unset($param);
@@ -638,6 +639,7 @@ class DB extends Base
         $_var = null;
         foreach ($param as $k => $v) {
             $_var .= ', `' . $k . '`=?';
+            if (is_array($v)) $v = implode(',', $v);
             $this->param[] = $v;
         }
         $sql .= substr($_var, 1);
