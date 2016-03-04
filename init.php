@@ -146,7 +146,7 @@ class Cellular
 				}
 			}
 			//检查动作名是否安全-防注入
-			if (!preg_match("/^[A-Za-z0-9_]+$/", $controller)) {
+			if (!preg_match("/^[A-Za-z0-9_.]+$/", $controller)) {
 				return false;
 			}
 			if (!preg_match("/^[A-Za-z0-9_]+$/", $action)) {
