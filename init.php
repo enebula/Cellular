@@ -174,6 +174,7 @@ class Cellular
 	 */
 	public static function getURL($controller = null, $action = null, $param = null)
 	{
+		$controller = strtr($controller, '.', '/');
 		$url = self::$webRootPath;
         $url .= DIRECTORY_SEPARATOR . (empty($controller) ? self::$config['controller'] : $controller);
         $url .= DIRECTORY_SEPARATOR . (empty($action) ? self::$config['action'] : $action);
