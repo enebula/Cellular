@@ -124,6 +124,10 @@ class Helper {
         }
         return $str;
     }
+
+    public static function randName () {
+        return date('YmdHis') . substr(microtime(), 2, 6);
+    }
 }
 
 ?>
