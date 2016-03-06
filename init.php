@@ -60,20 +60,28 @@ class Cellular
 	{
 		self::$frameworkPath = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 		self::$appPath = ($path == null) ? './' : $path . DIRECTORY_SEPARATOR;
+
 		//加载配置参数
 		self::$config = self::config('app');
+
 		//设置默认时区
 		if (isset(self::$config['timezone'])) date_default_timezone_set(self::$config['timezone']);
+
 		//获取uri
 		$uri = self::URI();
 		if ($uri === false) self::error('400', 'URI not allowed!');
+
 		//解析uri
 		if ($uri) $uri = self::parseURI($uri);
-		//定义静态资源常量
-		$assets = self::$config['assets'] ? self::$config['assets'] : self::$assetsPath . DIRECTORY_SEPARATOR . self::$config['struct']['assets'];
-		define('ASSETS', $assets);
+
+		//定义静态资源路径
+		$assets = self::$assetsPath . DIRECTORY_SEPARATOR . self::$config['struct']['assets'];
+		define('ASSETS', self::$config['assets'] ? self::$config['assets'] : $assets);
+		define('FILE', self::$config['file'] ? self::$config['file'] : $assets);
+
 		//定义试图目录
 		define('VIEWROOT', self::$appPath . self::$config['struct']['view'] . DIRECTORY_SEPARATOR);
+
 		//控制器转发
 		$result = self::hub($uri, self::$config['struct']['controller'], self::$config['controller'], self::$config['action']);
 		if (!$result) self::error('404', 'Page not Found!');
@@ -176,8 +184,19 @@ class Cellular
 	{
 		$controller = strtr($controller, '.', '/');
 		$url = self::$webRootPath;
-        $url .= DIRECTORY_SEPARATOR . (empty($controller) ? self::$config['controller'] : $controller);
-        $url .= DIRECTORY_SEPARATOR . (empty($action) ? self::$config['action'] : $action);
+
+		if ($controller) {
+			$url .= DIRECTORY_SEPARATOR . $controller;
+		} else {
+			if ($action || $param) $url .= DIRECTORY_SEPARATOR . self::$config['controller'];
+		}
+
+		if ($action) {
+			$url .= DIRECTORY_SEPARATOR .$action;
+		} else {
+			if ($param) $url .= DIRECTORY_SEPARATOR . self::$config['action'];
+		}
+
         if (!empty($param)) {
             $url .= DIRECTORY_SEPARATOR;
             if (is_array($param)) {

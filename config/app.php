@@ -10,6 +10,7 @@ return array(
 	),
 	'controller' => 'index',
 	'action' => 'main',
-	'assets' => null
+	'assets' => null,
+	'file' => null
 );
 ?>

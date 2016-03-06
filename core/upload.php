@@ -24,8 +24,6 @@ class Upload
                 } else {
                     if ($mime == $type) return $mime;
                 }
-            } else {
-                return $mime;
             }
         }
         return false;
@@ -39,7 +37,8 @@ class Upload
      */
     public function checkSize($size, $max)
     {
-        $max = $max * 1024;
+        $max = intval($max) * 1024;
+        $size = intval($size);
         if ($size > $max) return false;
         return $size;
     }
@@ -51,16 +50,15 @@ class Upload
      * @param $name|string
      * @return bool
      */
-    public function save($file, $path, $name)
+    public function save($tmp, $path, $name)
     {
-        if (empty($file)) return false;
         //创建路径
         if (!is_dir($path)) {
             if (!@mkdir($path, 0775, true)) return false;
         }
         //保存临时文件到指定目录
         $fpath = $path . DIRECTORY_SEPARATOR . $name;
-        if (move_uploaded_file($file['tmp_name'], $fpath)) {
+        if (move_uploaded_file($tmp, $fpath)) {
             chmod($fpath, 0755);
             return true;
         }

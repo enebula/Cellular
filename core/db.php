@@ -482,7 +482,7 @@ class DB extends Base
                     $this->order($key, $val);
                 }
             } else {
-                $this->order[] = $var[0];
+                $this->order[] = $this->formatField($var[0]);
             }
         } elseif ($num == 2) {
             $sort = $var[1] == 'desc' ? ' DESC' : ' ASC';
