@@ -66,6 +66,18 @@ class Upload
     }
 
     /**
+     *
+     * 删除文件
+     *
+     * @param $file
+     */
+    public function delete($file)
+    {
+        if (@unlink($file)) return true;
+        return false;
+    }
+
+    /**
      * 检查文件类型
      * @param $type|string 文件类型
      * @return bool|string

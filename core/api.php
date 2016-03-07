@@ -8,29 +8,27 @@
 namespace core;
 use Cellular;
 
-class API
+class API extends Base
 {
-    protected $class;
+    protected $model;
 
     /**
-     * 加载实例类
+     * 加载模型
      */
-    protected function loadClass($className, $param = null)
+    protected function model($name)
     {
-        if (null === $this->class) $this->class = new \stdClass();
-        $name = strtr(strtolower(str_replace('core.', '', $className)), '.', '_');
-        if (!isset($this->class->$name)) {
-            $this->class->$name = Cellular::loadClass($className, $param);
+        if (null === $this->model) $this->model = new \stdClass();
+        if (isset($this->model->$name)) {
+            return $this->model->$name;
         }
-        return $this->class->$name;
-    }
-
-    /**
-     * 载入配置信息
-     */
-    protected function config($name)
-    {
-        return Cellular::config($name);
+        $struct = Cellular::appStruct();
+        if ($model = Cellular::loadClass($struct['model'] . '.' . $name)) {
+            return $this->model->$name = $model->table($name);
+        }
+        if ($model = Cellular::loadClass('core.model')) {
+            return $this->model->$name = $model->table($name);
+        }
+        return false;
     }
 }
 
