@@ -12,10 +12,11 @@ class Cellular
 {
 	private static $config; //应用配置文件
 	private static $frameworkPath; //框架根目录
-	private static $appPath; //应用程序根目录
 	private static $webRootPath; //web根目录
+	private static $appPath; //应用程序根目录
 	private static $assetsPath; //静态资源目录
 	private static $classes = array(); //实例化的对象
+	private static $models = array(); //实例化数据库模型
 
 	/**
 	 * 自动加载类文件路径
@@ -172,11 +173,6 @@ class Cellular
 		return false;
 	}
 
-	public static function appStruct()
-	{
-		return self::$config['struct'];
-	}
-
 	/**
 	 * 返回路由格式的URL访问地址
 	 */
@@ -318,6 +314,47 @@ class Cellular
 		return false;
 	}
 
+	/**
+	 * 装载数据模型
+	 * @param $name
+	 * @param string $model
+	 * @return bool
+	 */
+	public static function loadModel($name, $model = 'core.model')
+	{
+		//检查是否已实例化
+		if (isset(self::$models[$name])) return self::$models[$name];
+		$class = '\\' . self::$config['struct']['model'] . '\\' . $name; //解析类名
+		if (class_exists($class)) {
+			return self::$models[$name] = new $class($name);
+		}
+		$class = '\\' . strtr($model, '.', '\\'); //解析类名
+		if (class_exists($class)) {
+			return self::$models[$name] = new $class($name);
+		}
+		return false;
+	}
+
+	/**
+	 * 卸载数据模型
+	 * @param $name
+	 */
+	public static function removeModel($name)
+	{
+		if (isset(self::$models[$name])) unset(self::$models[$name]);
+	}
+
+	public static function view($name, $value, &$cache)
+	{
+		if ($value) extract($value);
+		$path = self::$config['struct']['view'] . DIRECTORY_SEPARATOR . $name . '.php';
+		if ($path = self::getFilePath($path)) {
+			ob_start(); //开启缓冲区
+			include($path);
+			$cache = ob_get_contents();
+			ob_end_flush(); //关闭缓存并清空
+		}
+	}
 }
 
 define('STARTTIME', microtime(true));

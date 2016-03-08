@@ -19,21 +19,20 @@ class Controller extends Base {
 	private $viewData;
 	private $viewCache;
 
+	function __construct()
+	{
+		$this->model = new \stdClass();
+	}
+
 	/**
 	 * 加载模型
 	 */
 	protected function model($name)
 	{
-		if (null === $this->model) $this->model = new \stdClass();
-		if (isset($this->model->$name)) {
-			return $this->model->$name;
-		}
-		$struct = Cellular::appStruct();
-		if ($model = Cellular::loadClass($struct['model'] . '.' . $name)) {
-			return $this->model->$name = $model->table($name);
-		}
-		if ($model = Cellular::loadClass('core.model')) {
-			return $this->model->$name = $model->table($name);
+        if (isset($this->model->$name)) return $this->model->$name;
+		if ($model = Cellular::loadModel($name)) {
+			$this->model->$name = $model;
+			return $model;
 		}
 		return false;
 	}
@@ -51,7 +50,8 @@ class Controller extends Base {
 	 */
 	protected function display($name)
 	{
-
+		Cellular::view($name, $this->viewData, $this->viewCache);
+		/*
 		if ($this->viewData) extract($this->viewData);
 		$struct = Cellular::appStruct();
 		$path = $struct['view'] . DIRECTORY_SEPARATOR . $name . '.php';
@@ -61,6 +61,7 @@ class Controller extends Base {
 			$this->viewCache = ob_get_contents();
 			ob_end_flush(); //关闭缓存并清空
 		}
+		*/
 	}
 
 	/**

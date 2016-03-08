@@ -21,7 +21,7 @@ class Model extends DB
      */
     public function count($field = null)
     {
-        $sql = ($field !== null) ? 'COUNT('. $field .')' : 'COUNT(*)';
+        $sql = ($field != null) ? 'COUNT(' . $field . ')' : 'COUNT(*)';
         return $this->column($sql);
     }
 
@@ -60,7 +60,7 @@ class Model extends DB
     /**
      * 去重查询
      */
-    public function distinct($param)
+    public function distinct($field)
     {
         return $this->column('DISTINCT('. $field .')');
     }
@@ -70,11 +70,13 @@ class Model extends DB
      */
     public function increment($field, $num = 1)
     {
+        /*
         if (!is_numeric($num)) {
             die('num is not numeric');
         }
         $sql = 'UPDATE `'. $this->table .'` SET `'. $field .'` = `'. $field .'` + '. $num;
         return $this->exec($sql);
+        */
     }
 
     /**
@@ -82,11 +84,13 @@ class Model extends DB
      */
     public function decrement($field, $num = 1)
     {
+        /*
         if (!is_numeric($num)) {
             die('num is not numeric');
         }
         $sql = 'UPDATE `'. $this->table .'` SET `'. $field .'` = `'. $field .'` - '. $num;
         return $this->exec($sql);
+        */
     }
 }
 ?>
