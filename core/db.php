@@ -616,7 +616,7 @@ class DB extends Base
             $key .= ',`' . $k . '`';
             $value .= ',?';
             if (is_array($v)) $v = implode(',', $v);
-            $this->param[] = $v;
+            $this->param[] = (empty($v) && $v != '0' && !is_bool($v)) ? null : $v;
         }
         unset($param);
         $sql = 'INSERT INTO `' . $this->table . '` (' . substr($key, 1) . ') VALUES (' . substr($value, 1) . ')';
@@ -642,7 +642,7 @@ class DB extends Base
         foreach ($param as $k => $v) {
             $_var .= ', `' . $k . '`=?';
             if (is_array($v)) $v = implode(',', $v);
-            $this->param[] = $v;
+            $this->param[] = (empty($v) && $v != '0' && !is_bool($v)) ? null : $v;
         }
         $sql .= substr($_var, 1);
         unset($param);

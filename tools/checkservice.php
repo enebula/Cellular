@@ -21,6 +21,10 @@ class checkService {
             $this->output('Not install mbString');
             $this->error = false;
         }
+        if(!class_exists('Imagick')){
+            $this->output('Not install Imagick');
+            $this->error = false;
+        }
     }
 
     private function output($msg)
