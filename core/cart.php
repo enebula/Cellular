@@ -1,10 +1,12 @@
 <?php
 /**
  * Cellular Framework
- * Cart 购物车类
+ * 购物车类
  * @copyright Cellular Team
  */
+
 namespace core;
+
 
 class Cart
 {

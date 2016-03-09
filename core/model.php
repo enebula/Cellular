@@ -1,15 +1,26 @@
 <?php
 /**
- * Cellular Framework
- * 模型基类
+ * Cellular Faremwork
+ * 模型
  * @copyright Cellular Team
  */
+
 namespace core;
+
 
 class Model extends DB
 {
+    public function __construct($table = null)
+    {
+        parent::__construct();
+        if ($table != null) $this->table($table);
+        return $this;
+    }
+
     /**
      * 根据主键取出一条数据
+     * @param $id
+     * @return mixed
      */
     public function find($id)
     {

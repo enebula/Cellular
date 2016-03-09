@@ -1,15 +1,12 @@
 <?php
 /**
- *
- * Cellular Framework
- * 输入参数过滤
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-21
- *
+ * Cellular Faremwork
+ * HTTP 提交输入安全检查
+ * @copyright Cellular Team
  */
 
 namespace core;
+
 
 class Input {
 

@@ -4,9 +4,11 @@
  * DB - PDO Database Class
  * @copyright Cellular Team
  */
+
 namespace core;
 use PDO;
 use PDOException;
+
 
 class DB extends Base
 {
@@ -28,13 +30,11 @@ class DB extends Base
     /**
      * 构造函数
      */
-    function __construct($table = null)
+    function __construct()
     {
         $config = $this->config('db');
         $this->prefix = $config['prefix'];
         $this->connect($config['host'], $config['port'], $config['database'], $config['username'], $config['password'], $config['charset']);
-        if ($table != null) $this->table($table);
-        return $this;
     }
 
     /**

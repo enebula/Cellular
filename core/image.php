@@ -1,16 +1,13 @@
 <?php
 /**
- *
  * Cellular Framework
- * 基本类
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-9
- *
+ * 图像编辑类
+ * @copyright Cellular Team
  */
 
 namespace core;
 use Imagick;
+
 
 class Image
 {

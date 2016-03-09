@@ -1,17 +1,13 @@
 <?php
 /**
- *
- * Cellular Framework
- * redis封装
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-9
- *
+ * Cellular Faremwork
+ * Redis 驱动器
+ * @copyright Cellular Team
  */
 
 namespace core;
 use Redis;
-use Cellular;
+
 
 class Redis extends Base
 {
@@ -69,7 +65,7 @@ class Redis extends Base
      */
     public function setDB($id)
     {
-        $this->redis->select($db);
+        $this->redis->select($id);
     }
 
     /**

@@ -1,16 +1,13 @@
 <?php
 /**
- *
- * Cellular base http
- * HTTP请求访问类
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-22
- *
+ * Cellular Framework
+ * HTTP TCP/IP 请求访问类
+ * @copyright Cellular Team
  */
 
 namespace core;
 use curl_init;
+
 
 class http {
 

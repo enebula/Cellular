@@ -1,12 +1,13 @@
 <?php
 /**
- * Cellular Framework
- * Memcached Class
+ * Cellular Faremwork
+ * Memcached 驱动器
  * @copyright Cellular Team
  */
+
 namespace core;
 use Memcached;
-use Cellular;
+
 
 class Memcached extends Base
 {

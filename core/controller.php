@@ -1,16 +1,13 @@
 <?php
 /**
- *
  * Cellular Framework
- * 控制器基础类
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-9
- *
+ * 控制器类
+ * @copyright Cellular Team
  */
 
 namespace core;
 use Cellular;
+
 
 class Controller extends Base {
 	protected $model;
@@ -51,17 +48,6 @@ class Controller extends Base {
 	protected function display($name)
 	{
 		Cellular::view($name, $this->viewData, $this->viewCache);
-		/*
-		if ($this->viewData) extract($this->viewData);
-		$struct = Cellular::appStruct();
-		$path = $struct['view'] . DIRECTORY_SEPARATOR . $name . '.php';
-		if ($path = Cellular::getFilePath($path)) {
-			ob_start(); //开启缓冲区
-			include($path);
-			$this->viewCache = ob_get_contents();
-			ob_end_flush(); //关闭缓存并清空
-		}
-		*/
 	}
 
 	/**
@@ -85,5 +71,4 @@ class Controller extends Base {
 		}
 	}
 }
-
 ?>

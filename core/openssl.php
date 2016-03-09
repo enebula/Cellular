@@ -1,15 +1,12 @@
 <?php
 /**
- *
- * Cellular Framework
- * openSSL封装
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-25
- *
+ * Cellular Faremwork
+ * OpenSSL 封装
+ * @copyright Cellular Team
  */
 
 namespace core;
+
 
 class OpenSSL {
 

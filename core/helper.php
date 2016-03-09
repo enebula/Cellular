@@ -1,16 +1,13 @@
 <?php
 /**
- *
  * Cellular Framework
- * 辅助类
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-9
- *
+ * 辅助功能类
+ * @copyright Cellular Team
  */
 
 namespace core;
 use Cellular;
+
 
 class Helper {
     /**

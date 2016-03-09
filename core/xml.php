@@ -1,15 +1,12 @@
 <?php
 /**
- *
- * Cellular Framework
- * XML封装
- *
- * @author mark weixuan.1987@hotmail.com
- * @version 1.0 2015-12-24
- *
+ * Cellular Faremwork
+ * XML 操作封装
+ * @copyright Cellular Team
  */
 
 namespace core;
+
 
 class Xml {
 

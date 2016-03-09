@@ -1,10 +1,12 @@
 <?php
 /**
- * Cellular Framework
- * Page 分页类
+ * Cellular Faremwork
+ * 分页类
  * @copyright Cellular Team
  */
+
 namespace core;
+
 
 class Page
 {

@@ -1,12 +1,13 @@
 <?php
 /**
- * Cellular Framework
- * Mongo Class
+ * Cellular Faremwork
+ * Mongo驱动
  * @copyright Cellular Team
  */
+
 namespace core;
 use MongoClient;
-use Cellular;
+
 
 class Mongo extends Base
 {

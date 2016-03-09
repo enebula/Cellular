@@ -1,13 +1,14 @@
 <?php
 /**
- * Cellular DMS
+ * Cellular Faremwork
  * 文件上传类
  * @copyright Cellular Team
  */
 
 namespace core;
 
-class Upload
+
+class Upload extends IO
 {
     /**
      * 检查文件类型
@@ -53,27 +54,13 @@ class Upload
     public function save($tmp, $path, $name)
     {
         //创建路径
-        if (!is_dir($path)) {
-            if (!@mkdir($path, 0775, true)) return false;
-        }
+        if (!$this->creatDir($path)) return false;
         //保存临时文件到指定目录
-        $fpath = $path . DIRECTORY_SEPARATOR . $name;
+        $fpath = $path . $name;
         if (move_uploaded_file($tmp, $fpath)) {
             chmod($fpath, 0755);
             return true;
         }
-        return false;
-    }
-
-    /**
-     *
-     * 删除文件
-     *
-     * @param $file
-     */
-    public function delete($file)
-    {
-        if (@unlink($file)) return true;
         return false;
     }
 
