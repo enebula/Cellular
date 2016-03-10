@@ -270,7 +270,7 @@ class Cellular
 	public static function getFilePath($file)
 	{
 		//检查文件名是否安全-防注入
-		if (preg_match("/^[A-Za-z0-9_\\-\\/.]+$/", $file)) {  //此处windows下兼容存储bug
+		if (preg_match("/^[A-Za-z0-9_\\-\\/.]+$/", strtr($file, DIRECTORY_SEPARATOR, '/'))) {
 			//解析文件路径
 			$path = self::$appPath.$file;
 			if (is_file($path)) return $path;
