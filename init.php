@@ -100,7 +100,7 @@ class Cellular
 			self::$assetsPath = self::$webRootPath;
 		}
 		//请求资源检查
-		if (!preg_match("/^[A-Za-z0-9_\-\/.%&#@]+$/", $uri) && !empty($uri)) {
+		if (!preg_match("/^[A-Za-z0-9_\\-\\/.%&#@]+$/", $uri) && !empty($uri)) {
 			return false;
 		}
 		return $uri;
@@ -270,7 +270,7 @@ class Cellular
 	public static function getFilePath($file)
 	{
 		//检查文件名是否安全-防注入
-		if (preg_match("/^[A-Za-z0-9_\-\/.]+$/", $file)) {
+		if (preg_match("/^[A-Za-z0-9_\\-\\/.]+$/", $file)) {  //此处windows下兼容存储bug
 			//解析文件路径
 			$path = self::$appPath.$file;
 			if (is_file($path)) return $path;

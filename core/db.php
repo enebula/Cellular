@@ -12,10 +12,13 @@ use PDOException;
 
 class DB extends Base
 {
+    private static $master; //主库连接
+    private static $slave; //从库连接
+    private $driver;
+    private $db;
+    private $char;
     private $table;
     private $prefix;
-    private $pdo;
-    private $stmt; // sql statement
     private $param; // sql parameter
     private $where;
     private $whereChild;
@@ -33,8 +36,21 @@ class DB extends Base
     function __construct()
     {
         $config = $this->config('db');
+        $this->driver = $config['driver'];
+        $this->db = $config['database'];
+        $this->char = $config['charset'];
         $this->prefix = $config['prefix'];
-        $this->connect($config['host'], $config['port'], $config['database'], $config['username'], $config['password'], $config['charset']);
+
+        //连接主库
+        $masterConf = $config['master'];
+        $this->connMaster($masterConf['host'], $masterConf['port'], $masterConf['username'], $masterConf['password']);
+
+        //连接从库
+        if (isset($config['slave']) && count($config['slave']) > 0) {
+            $node = array_rand($config['slave']);
+            $slaveConf = $config['slave'][$node];
+            $this->connSlave($slaveConf['host'], $slaveConf['port'], $slaveConf['username'], $slaveConf['password']);
+        }
     }
 
     /**
@@ -42,30 +58,66 @@ class DB extends Base
      */
     function __destruct()
     {
-        $this->pdo = null;
     }
 
     /**
-     * 连接数据库
+     * 连接到主数据库
+     * @param $host
+     * @param $port
+     * @param $username
+     * @param $password
      */
-    private function connect($host, $port, $db, $username, $password, $charset)
+    private function connMaster($host, $port, $username, $password)
     {
-        static $conn = null;
-        if ($conn != null) {
-            return $this->pdo =& $conn;
-        } else {
-            $dsn = 'mysql:host=' . $host . ';port=' . $port . ';dbname=' . $db;
-            try {
-                $param = array(
-                    //PDO::ATTR_PERSISTENT => true,
-                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'' . $charset . '\'',
-                );
-                $conn = new PDO($dsn, $username, $password, $param);
-                return $this->pdo = $conn;
-            } catch (PDOException $e) {
-                die('PDOException: ' . $e->getMessage() . '; PHP-ERROR:' . $e->getFile() . ' on (' . $e->getLine() . ')');
-            }
+        if (!self::$master) {
+            self::$master = $this->setConnect($host, $port, $username, $password);
         }
+    }
+
+    /**
+     * 连接到从数据库
+     * @param $host
+     * @param $port
+     * @param $username
+     * @param $password
+     */
+    private function connSlave($host, $port, $username, $password)
+    {
+        if (!self::$slave) {
+            self::$slave = $this->setConnect($host, $port, $username, $password);
+        }
+    }
+
+    /**
+     * 执行连接数据库
+     * @param $host
+     * @param $port
+     * @param $username
+     * @param $password
+     * @return PDO
+     */
+    private function setConnect($host, $port, $username, $password)
+    {
+        try {
+            $dsn = $this->driver . ':host=' . $host . ';port=' . $port . ';dbname=' . $this->db;
+            $param = array(
+                //PDO::ATTR_PERSISTENT => true,
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'' . $this->char . '\'',
+            );
+            return new PDO($dsn, $username, $password, $param);
+        } catch (PDOException $e) {
+            die('PDOException: ' . $e->getMessage() . '; PHP-ERROR:' . $e->getFile() . ' on (' . $e->getLine() . ')');
+        }
+    }
+
+    /**
+     * 返回数据库连接
+     */
+    private function connect($select = 'master')
+    {
+        if (!$select || $select == 'master') return self::$master;
+        if (!self::$slave) return self::$master;
+        return self::$slave;
     }
 
     /**
@@ -540,27 +592,28 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        return $this->query($sql);
+        return $this->query($sql, 'slave');
     }
 
-    protected function query($sql)
+    protected function query($sql, $select = 'master')
     {
         $this->debug('SQL:'.$sql);
+        $stmt = null;
         if (is_null($this->param)) {
             try {
-                $this->stmt = $this->pdo->query($sql, PDO::FETCH_ASSOC);
+                $stmt = $this->connect($select)->query($sql, PDO::FETCH_ASSOC);
                 $this->reset();
-                return $this->stmt;
+                return $stmt;
             } catch (PDOException $e) {
                 die('PDOException: ' . $e->getMessage());
             }
         } else {
             try {
-                $this->stmt = $this->pdo->prepare($sql);
-                $this->stmt->execute($this->param);
-                //$this->debug[] = 'DumpParams:'.$this->stmt->debugDumpParams();
+                $stmt = $this->connect($select)->prepare($sql);
+                $stmt->execute($this->param);
+                //$this->debug[] = 'DumpParams:'.$stmt->debugDumpParams();
                 $this->reset();
-                return $this->stmt;
+                return $stmt;
             } catch (PDOException $e) {
                 die('PDOException: ' . $e->getMessage());
             }
@@ -621,7 +674,7 @@ class DB extends Base
         unset($param);
         $sql = 'INSERT INTO `' . $this->table . '` (' . substr($key, 1) . ') VALUES (' . substr($value, 1) . ')';
         if ($this->query($sql)) {
-            return $this->pdo->lastInsertId();
+            return $this->connect()->lastInsertId();
         }
         return false;
     }
@@ -706,7 +759,7 @@ class DB extends Base
     public function trans()
     {
         try {
-            $this->pdo->beginTransaction();
+            $this->connect()->beginTransaction();
         } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
@@ -718,7 +771,7 @@ class DB extends Base
     public function commit()
     {
         try {
-            $this->pdo->commit();
+            $this->connect()->commit();
         } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
@@ -730,7 +783,7 @@ class DB extends Base
     public function rollBack()
     {
         try {
-            $this->pdo->rollBack();
+            $this->connect()->rollBack();
         } catch (PDOException $e) {
             die('PDOException: ' . $e->getMessage());
         }
