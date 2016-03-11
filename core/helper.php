@@ -125,6 +125,13 @@ class Helper {
     public static function randName () {
         return date('YmdHis') . substr(microtime(), 2, 6);
     }
+
+    public static function floatToInteger($float, $precision)
+    {
+        $number = sprintf('%.' . $precision . 'f', $float); //补零操作
+        $number = str_replace('.', '', $number); //在取小数点
+        return intval($number);
+    }
 }
 
 ?>

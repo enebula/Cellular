@@ -216,7 +216,13 @@ class DB extends Base
         $num = func_num_args();
         $var = func_get_args();
         if ($num > 1) {
-            $join = ' LEFT JOIN `' . $this->prefix . $var[0] . '` ON ';
+            if (strpos($var[0], ':')) {
+                $temp = explode(':', $var[0]);
+                $table = '`' . $this->getTable($temp[0]) . '` as `' . $this->getTable($temp[1]) . '`';
+            } else {
+                $table = '`' . $this->getTable($var[0]) . '`';
+            }
+            $join = ' LEFT JOIN ' . $table . ' ON ';
             switch ($num) {
                 case 2:
                     $join .= $this->formatField($var[1]);
@@ -295,14 +301,14 @@ class DB extends Base
                             $this->param[] = $param[2];
                             break;
                         case 'like':
-                            $keyword = ($param[2] == 'both') ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
-                            $sql .= ' ' . $this->formatField($param[0]) . ' LIKE ' . $keyword . ' ';
-                            $this->param[] = $param[1];
+                            $keyword = ($param[2] == 'both') ? '%' . $param[1] . '%' : ($param[2] == 'left' ? '%' . $param[1] : $param[1] . '%');
+                            $sql .= ' ' . $this->formatField($param[0]) . ' LIKE ?';
+                            $this->param[] = $keyword;
                             break;
                         case 'notlike':
-                            $keyword = $param[2] == 'both' ? '%?%' : ($param[2] == 'left' ? '%?' : '?%');
-                            $sql .= ' ' . $this->formatField($param[0]) . ' NOT LIKE ' . $keyword . ' ';
-                            $this->param[] = $param[1];
+                            $keyword = ($param[2] == 'both') ? '%' . $param[1] . '%' : ($param[2] == 'left' ? '%' . $param[1] : $param[1] . '%');
+                            $sql .= ' ' . $this->formatField($param[0]) . ' NOT LIKE ?';
+                            $this->param[] = $keyword;
                             break;
                         case 'between':
                             $sql .= ' ' . $this->formatField($param[0]) . ' BETWEEN ? AND ? ';
