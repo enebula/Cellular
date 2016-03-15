@@ -42,6 +42,16 @@ class Helper {
         return $token;
     }
 
+    public static function randNum($length = 6)
+    {
+        $number = null;
+        while ($length) {
+            $number .= mt_rand(0, 9);
+            $length--;
+        }
+        return $number;
+    }
+
     /**
      * 字符串转换为数组格式
      */

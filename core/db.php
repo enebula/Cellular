@@ -378,8 +378,14 @@ class DB extends Base
             $value = array();
             switch ($num) {
                 case 1:
-                    //字符串条件
-                    $value = $var[0];
+                    if (is_array($var[0])) {
+                        foreach ($var[0] as $k => $v) {
+                            $this->where($k, $v);
+                        }
+                    } else {
+                        //字符串条件
+                        $value = $var[0];
+                    }
                     break;
                 case 2:
                     //等于条件
@@ -390,7 +396,7 @@ class DB extends Base
                     $value = array($var[0], $var[1], $var[2]);
                     break;
             }
-            $this->setWhere($value, 'and');
+            if ($value) $this->setWhere($value, 'and');
         }
         return $this;
     }
@@ -410,8 +416,14 @@ class DB extends Base
             $value = array();
             switch ($num) {
                 case 1:
-                    //字符串条件
-                    $value = $var[0];
+                    if (is_array($var[0])) {
+                        foreach ($var[0] as $k => $v) {
+                            $this->where($k, $v);
+                        }
+                    } else {
+                        //字符串条件
+                        $value = $var[0];
+                    }
                     break;
                 case 2:
                     //等于条件
@@ -422,7 +434,7 @@ class DB extends Base
                     $value = array($var[0], $var[1], $var[2]);
                     break;
             }
-            $this->setWhere($value, 'or');
+            if ($value) $this->setWhere($value, 'or');
         }
         return $this;
     }
