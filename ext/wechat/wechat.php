@@ -61,11 +61,21 @@ class wechat
     }
 
     /**
-     * 网页授权 access_token
+     * 通过 code 换取网页授权 access_token（与基础支持中的 access_token 不同）
      * @param $appid 第三方用户唯一凭证
      * @param $secret 第三方用户唯一凭证密钥 appsecret
      * @param $code 引导用户进入授权页面同意授权后获取的 code
      * @return bool
+     * 正确时返回的JSON数据包如下：
+     * {
+     *     "access_token":"ACCESS_TOKEN", # 网页授权接口调用凭证,注意：此 access_token 与基础支持的 access_token 不同
+     *     "expires_in":7200,
+     *     "refresh_token":"REFRESH_TOKEN",
+     *     "openid":"OPENID",
+     *     "scope":"SCOPE"
+     * }
+     * 错误时微信会返回JSON数据包如下（示例为Code无效错误）:
+     * {"errcode":40029,"errmsg":"invalid code"}
      */
     public function authToken($appid, $secret, $code)
     {
