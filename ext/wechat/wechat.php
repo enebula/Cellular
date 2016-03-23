@@ -81,9 +81,19 @@ class wechat
     }
     /**
      * 刷新access_token（如果需要）
-     * @param $appid
-     * @param $refreshToken
+     * @param $appid 公众号的唯一标识
+     * @param $refreshToken 填写通过 access_token 获取到的 refresh_token 参数
      * @return bool
+     * 正确时返回的JSON数据包如下：
+     * {
+     *     "access_token":"ACCESS_TOKEN", # 网页授权接口调用凭证,注意：此 access_token 与基础支持的 access_token 不同
+     *     "expires_in":7200, # access_token 接口调用凭证超时时间，单位（秒）
+     *     "refresh_token":"REFRESH_TOKEN", # 用户刷新 access_token
+     *     "openid":"OPENID", # 用户唯一标识
+     *     "scope":"SCOPE" # 用户授权的作用域，使用逗号（,）分隔
+     * }
+     * 错误时微信会返回JSON数据包如下（示例为 Code 无效错误）:
+     * {"errcode":40029,"errmsg":"invalid code"}
      */
     public function refershToken($appid, $refreshToken)
     {
