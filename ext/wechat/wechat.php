@@ -69,10 +69,10 @@ class wechat
      * 正确时返回的JSON数据包如下：
      * {
      *     "access_token":"ACCESS_TOKEN", # 网页授权接口调用凭证,注意：此 access_token 与基础支持的 access_token 不同
-     *     "expires_in":7200,
-     *     "refresh_token":"REFRESH_TOKEN",
-     *     "openid":"OPENID",
-     *     "scope":"SCOPE"
+     *     "expires_in":7200, # access_token接口调用凭证超时时间，单位（秒）
+     *     "refresh_token":"REFRESH_TOKEN", # 用户刷新access_token
+     *     "openid":"OPENID", # 用户唯一标识，请注意，在未关注公众号时，用户访问公众号的网页，也会产生一个用户和公众号唯一的OpenID
+     *     "scope":"SCOPE" # 用户授权的作用域，使用逗号（,）分隔
      * }
      * 错误时微信会返回JSON数据包如下（示例为Code无效错误）:
      * {"errcode":40029,"errmsg":"invalid code"}
