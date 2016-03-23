@@ -68,7 +68,7 @@ class wechat
      * @return bool
      * 正确时返回的JSON数据包如下：
      * {
-     *     "access_token":"ACCESS_TOKEN", # 网页授权接口调用凭证,注意：此 access_token 与基础支持的 access_token 不同
+     *     "access_token":"ACCESS_TOKEN", # 网页授权接口调用凭证，注意：此 access_token 与基础支持的 access_token 不同
      *     "expires_in":7200, # access_token接口调用凭证超时时间，单位（秒）
      *     "refresh_token":"REFRESH_TOKEN", # 用户刷新access_token
      *     "openid":"OPENID", # 用户唯一标识，请注意，在未关注公众号时，用户访问公众号的网页，也会产生一个用户和公众号唯一的OpenID
@@ -96,7 +96,7 @@ class wechat
      * @return bool
      * 正确时返回的JSON数据包如下：
      * {
-     *     "access_token":"ACCESS_TOKEN", # 网页授权接口调用凭证,注意：此 access_token 与基础支持的 access_token 不同
+     *     "access_token":"ACCESS_TOKEN", # 网页授权接口调用凭证，注意：此 access_token 与基础支持的 access_token 不同
      *     "expires_in":7200, # access_token 接口调用凭证超时时间，单位（秒）
      *     "refresh_token":"REFRESH_TOKEN", # 用户刷新 access_token
      *     "openid":"OPENID", # 用户唯一标识
@@ -120,7 +120,7 @@ class wechat
 
     /**
      * 检验网页授权凭证 access_token 是否有效
-     * @param $token 网页授权接口调用凭证,注意：此 access_token 与基础支持的 access_token 不同
+     * @param $token 网页授权接口调用凭证，注意：此 access_token 与基础支持的 access_token 不同
      * @param $openID 用户的唯一标识
      * @return bool
      * 正确时的Json返回结果：{ "errcode":0,"errmsg":"ok"}
