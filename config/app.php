@@ -2,6 +2,7 @@
 return array(
 	'timezone' => 'Asia/Shanghai',
 	'struct' => array(
+		'ext' => 'ext',
 		'controller' => 'controller',
 		'model' => 'model',
 		'view' => 'view',

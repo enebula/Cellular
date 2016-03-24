@@ -215,14 +215,14 @@ class Cellular
 	public static function error($code, $msg = null)
 	{
 		$request = self::getFile('error/400.html');
-		$var = array('<header></header>','<p></p>');
+		$var = array('<header name="header"></header>','<p name="msg"></p>');
 		switch ($code) {
 			case '400':
-				$value = array('<header>400</header>','<p>'.$msg.'</p>');
+				$value = array('<header name="header">400</header>','<p name="msg">'.$msg.'</p>');
 				$request = str_replace($var, $value, $request);
 				break;
 			case '404':
-				$value = array('<header>404</header>','<p>'.$msg.'</p>');
+				$value = array('<header name="header">404</header>','<p name="msg">'.$msg.'</p>');
 				$request = str_replace($var, $value, $request);
 				break;
 		}
@@ -354,6 +354,26 @@ class Cellular
 			$cache = ob_get_contents();
 			ob_end_flush(); //关闭缓存并清空
 		}
+	}
+
+	/**
+	 * 载入扩展功能
+	 * @param $name
+	 * @return bool
+	 */
+	public static function loadExt($name)
+	{
+		return self::loadClass(self::$config['struct']['ext'] . '.' . $name);
+	}
+
+	/**
+	 * 卸载扩展功能
+	 * @param $name
+	 * @return bool
+	 */
+	public static function removeExt($name)
+	{
+		return self::remvoeClass(self::$config['struct']['ext'] . '.' . $name);
 	}
 }
 
