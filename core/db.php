@@ -579,25 +579,9 @@ class DB extends Base
         return $this;
     }
 
-    /**
-     * 查询记录
-     */
-    protected function select($param = null)
+    protected function constraints()
     {
-        if (is_null($this->table)) {
-            die('table is null');
-        }
-        $param = $this->formatField($param);
-        if (is_null($param)) $param = '*';
-        $sql = 'SELECT ' . $param;
-        $sql .= ' FROM `' . $this->table . '`';
-        if (!is_null($this->join)) {
-            if (is_array($this->join)) {
-                foreach ($this->join as $value) {
-                    $sql .= $value;
-                }
-            }
-        }
+        $sql = null;
         $where = $this->getWhere();
         if ($where) {
             $sql .= ' WHERE ' . $where;
@@ -611,7 +595,7 @@ class DB extends Base
         if (!is_null($this->limit)) {
             $sql .= ' LIMIT ' . $this->limit;
         }
-        return $this->query($sql, 'slave');
+        return $sql;
     }
 
     protected function query($sql, $select = 'master')
@@ -638,6 +622,29 @@ class DB extends Base
             }
         }
         return false;
+    }
+
+    /**
+     * 查询记录
+     */
+    protected function select($param = null)
+    {
+        if (is_null($this->table)) {
+            die('table is null');
+        }
+        $param = $this->formatField($param);
+        if (is_null($param)) $param = '*';
+        $sql = 'SELECT ' . $param;
+        $sql .= ' FROM `' . $this->table . '`';
+        if (!is_null($this->join)) {
+            if (is_array($this->join)) {
+                foreach ($this->join as $value) {
+                    $sql .= $value;
+                }
+            }
+        }
+        $sql .= $this->constraints();
+        return $this->query($sql, 'slave');
     }
 
     /**
@@ -718,19 +725,7 @@ class DB extends Base
         }
         $sql .= substr($_var, 1);
         unset($param);
-        $where = $this->getWhere();
-        if ($where) {
-            $sql .= ' WHERE ' . $where;
-        }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
-        }
-        if (!is_null($this->order)) {
-            $sql .= ' ORDER BY ' . implode(',', $this->order);
-        }
-        if (!is_null($this->limit)) {
-            $sql .= ' LIMIT ' . $this->limit;
-        }
+        $sql .= $this->constraints();
         return $this->query($sql);
     }
 
@@ -743,19 +738,39 @@ class DB extends Base
             die('table is null');
         }
         $sql = 'DELETE FROM `' . $this->table . '`';
-        $where = $this->getWhere();
-        if ($where) {
-            $sql .= ' WHERE ' . $where;
+        $sql .= $this->constraints();
+        return $this->query($sql);
+    }
+
+    /**
+     * 自增值
+     * @param $field
+     * @param int $num
+     * @return bool|null
+     */
+    public function increment($field, $num = 1)
+    {
+        if (!is_numeric($num)) {
+            die('num is not numeric');
         }
-        if (!is_null($this->group)) {
-            $sql .= ' GROUP BY ' . $this->group;
+        $sql = 'UPDATE `'. $this->getTable() .'` SET `'. $field .'` = `'. $field .'` + '. $num;
+        $sql .= $this->constraints();
+        return $this->query($sql);
+    }
+
+    /**
+     * 自减值
+     * @param $field
+     * @param int $num
+     * @return bool|null
+     */
+    public function decrement($field, $num = 1)
+    {
+        if (!is_numeric($num)) {
+            die('num is not numeric');
         }
-        if (!is_null($this->order)) {
-            $sql .= ' ORDER BY ' . implode(',', $this->order);
-        }
-        if (!is_null($this->limit)) {
-            $sql .= ' LIMIT ' . $this->limit;
-        }
+        $sql = 'UPDATE `'. $this->getTable() .'` SET `'. $field .'` = `'. $field .'` - '. $num;
+        $sql .= $this->constraints();
         return $this->query($sql);
     }
 

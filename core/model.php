@@ -75,33 +75,5 @@ class Model extends DB
     {
         return $this->column('DISTINCT('. $field .')');
     }
-
-    /**
-     * 自增值
-     */
-    public function increment($field, $num = 1)
-    {
-        /*
-        if (!is_numeric($num)) {
-            die('num is not numeric');
-        }
-        $sql = 'UPDATE `'. $this->table .'` SET `'. $field .'` = `'. $field .'` + '. $num;
-        return $this->exec($sql);
-        */
-    }
-
-    /**
-     * 自减值
-     */
-    public function decrement($field, $num = 1)
-    {
-        /*
-        if (!is_numeric($num)) {
-            die('num is not numeric');
-        }
-        $sql = 'UPDATE `'. $this->table .'` SET `'. $field .'` = `'. $field .'` - '. $num;
-        return $this->exec($sql);
-        */
-    }
 }
 ?>
