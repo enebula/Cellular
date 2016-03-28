@@ -346,7 +346,9 @@ class Cellular
 
 	public static function view($name, $value, &$cache)
 	{
-		if ($value) extract($value);
+        self::helper('view'); //向视图中注入辅助函数
+		if ($value) extract($value); //向视图中注入变量参数
+        //载入视图文件
 		$path = self::$config['struct']['view'] . DIRECTORY_SEPARATOR . $name . '.php';
 		if ($path = self::getFilePath($path)) {
 			ob_start(); //开启缓冲区
@@ -375,6 +377,16 @@ class Cellular
 	{
 		return self::remvoeClass(self::$config['struct']['ext'] . '.' . $name);
 	}
+
+    /**
+     * 载入辅助类
+     * @param $name
+     */
+    public static function helper($name)
+    {
+        $name = strtr($name, '.', '/');
+        self::loadFile('helper/' . $name . '.php');
+    }
 }
 
 define('STARTTIME', microtime(true));
