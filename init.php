@@ -290,8 +290,13 @@ class Cellular
 		if (preg_match("/^[A-Za-z0-9_.]+$/", $className)) {
 			//检查是否已实例化
 			if (isset(self::$classes[$className])) return self::$classes[$className];
+			//解析类名
+			if (strpos($className, '.')) {
+				$class = '\\'.strtr($className, '.', '\\');
+			} else {
+				$class = 'core' . '\\' . $className;
+			}
 			//实例化类
-			$class = '\\'.strtr($className, '.', '\\'); //解析类名
 			if (class_exists($class)) {
 				return self::$classes[$className] = new $class($param);
 			}

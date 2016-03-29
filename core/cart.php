@@ -11,13 +11,15 @@ namespace core;
 class Cart
 {
 	private $cookie;
+	private $path;
 
     /**
      * Cart constructor.
      */
 	public function __construct()
 	{
-
+		$this->cookie = 'cart';
+		$this->path = '/';
 	}
 
     /**
@@ -55,13 +57,13 @@ class Cart
 		if ($this->search($id)) {
 			$cart = unserialize($_COOKIE[$this->cookie]);
 			$cart[$id] += $number;
-			setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365);
+			setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365, $this->path);
 		} else {
 			if (isset($_COOKIE[$this->cookie])) {
 				$cart = unserialize($_COOKIE[$this->cookie]);
 			}
 			$cart[$id] = $number;
-			setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365);
+			setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365, $this->path);
 		}
 	}
 
@@ -75,7 +77,7 @@ class Cart
 		if ($this->search($id)) {
 			$cart = unserialize($_COOKIE[$this->cookie]);
 			$cart[$id] = $number;
-			setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365);
+			setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365, $this->path);
 		}
 	}
 
@@ -91,7 +93,7 @@ class Cart
 				unset($cart[$id]);
 			}
 			if (count($cart) > 0) {
-				setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365);
+				setCookie($this->cookie, serialize($cart), time() + 3600 * 24 * 365, $this->path);
 			} else {
 				$this->clear();
 			}
@@ -103,7 +105,7 @@ class Cart
      */
 	function clear()
 	{
-		setCookie($this->cookie, null, time() - 1);
+		setCookie($this->cookie, '', time() - 3600, $this->path);
 	}
 
 	/**
