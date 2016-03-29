@@ -7,7 +7,7 @@
 
 namespace ext\wechat;
 
-class wechat
+class Common
 {
     /**
      * 获取 access token
@@ -90,7 +90,7 @@ class wechat
         return false;
     }
     /**
-     * 刷新access_token（如果需要）
+     * 刷新 access_token（如果需要）
      * @param $appid 公众号的唯一标识
      * @param $refreshToken 填写通过 access_token 获取到的 refresh_token 参数
      * @return bool
