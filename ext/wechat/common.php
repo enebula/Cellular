@@ -15,7 +15,7 @@ class Common
      * @param $secret 第三方用户唯一凭证密钥 appsecret
      * @return mixed
      */
-    public function accessToken($appid, $secret)
+    public static function accessToken($appid, $secret)
     {
         $url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' . $appid . '&secret=' . $secret;
         $callback = file_get_contents($url);
@@ -35,7 +35,7 @@ class Common
      * @param string $lang 返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
      * @return bool
      */
-    public function unionID($token, $openID, $lang = 'zh-CN') {
+    public static function unionID($token, $openID, $lang = 'zh-CN') {
         if (empty($token)) die('token is not defined');
         $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token=' . $token . '&openid=' . $openID . '&lang=' . $lang;
         $callback = file_get_contents($url);
@@ -53,7 +53,7 @@ class Common
      * @param $appid 第三方用户唯一凭证
      * @param $url 授权后重定向的回调链接地址 请使用urlencode对链接进行处理
      */
-    public function getCode($appid, $url)
+    public static function code($appid, $url)
     {
         $url = urlencode($url);
         $url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . $appid . '&redirect_uri=' . $url . '&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect';
@@ -77,7 +77,7 @@ class Common
      * 错误时微信会返回JSON数据包如下（示例为Code无效错误）:
      * {"errcode":40029,"errmsg":"invalid code"}
      */
-    public function authToken($appid, $secret, $code)
+    public static function authToken($appid, $secret, $code)
     {
         $url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' . $appid . '&secret=' . $secret . '&code=' . $code . '&grant_type=authorization_code';
         $callback = file_get_contents($url);
@@ -105,7 +105,7 @@ class Common
      * 错误时微信会返回JSON数据包如下（示例为 Code 无效错误）:
      * {"errcode":40029,"errmsg":"invalid code"}
      */
-    public function refershToken($appid, $refreshToken)
+    public static function refershToken($appid, $refreshToken)
     {
         $url = 'https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=' . $$appid . '&grant_type=refresh_token&refresh_token=' . $refreshToken;
         $callback = file_get_contents($url);
@@ -126,7 +126,7 @@ class Common
      * 正确时的Json返回结果：{ "errcode":0,"errmsg":"ok"}
      * 错误时的Json返回示例：{ "errcode":40003,"errmsg":"invalid openid"}
      */
-    public function checkAuthToken($token, $openID)
+    public static function checkAuthToken($token, $openID)
     {
         $url = 'https://api.weixin.qq.com/sns/auth?access_token=' . $token . '&openid=' . $openID;
         $callback = file_get_contents($url);

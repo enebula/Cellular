@@ -17,7 +17,7 @@ class Pay
      * @param $device_info string(32)   设备号     终端设备号(门店号或收银设备ID)，注意：PC网页或公众号内支付请传"WEB"
      * @return bool
      */
-    public function unifiedOrder($appid, $mch_id, $device_info = 'WEB')
+    public static function unifiedOrder($appid, $mch_id, $device_info = 'WEB')
     {
         $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
         $callback = file_get_contents($url);
@@ -40,7 +40,7 @@ class Pay
      * 调用关单或撤销接口API之前，需确认支付状态；
      * @return bool
      */
-    public function orderQuery()
+    public static function orderQuery()
     {
         $url = 'https://api.mch.weixin.qq.com/pay/orderquery';
         $callback = file_get_contents($url);
@@ -59,7 +59,7 @@ class Pay
      * 注意：订单生成后不能马上调用关单接口，最短调用时间间隔为5分钟。
      * @return bool
      */
-    public function closeOrder()
+    public static function closeOrder()
     {
         $url = 'https://api.mch.weixin.qq.com/pay/closeorder';
         $callback = file_get_contents($url);
@@ -80,7 +80,7 @@ class Pay
      * 2、微信支付退款支持单笔交易分多次退款，多次退款需要提交原支付订单的商户订单号和设置不同的退款单号。一笔退款失败后重新提交，要采用原来的退款单号。总退款金额不能超过用户实际支付金额。
      * @return bool
      */
-    public function refund()
+    public static function refund()
     {
         $url = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
         $callback = file_get_contents($url);
@@ -98,7 +98,7 @@ class Pay
      * 提交退款申请后，通过调用该接口查询退款状态。退款有一定延时，用零钱支付的退款20分钟内到账，银行卡支付的退款3个工作日后重新查询退款状态。
      * @return bool
      */
-    public function refundQuery()
+    public static function refundQuery()
     {
         $url = 'https://api.mch.weixin.qq.com/pay/refundquery';
         $callback = file_get_contents($url);
@@ -120,7 +120,7 @@ class Pay
      * 3、对账单中涉及金额的字段单位为“元”。
      * @return bool
      */
-    public function downloadBill()
+    public static function downloadBill()
     {
         $url = 'https://api.mch.weixin.qq.com/pay/downloadbill';
         $callback = file_get_contents($url);
@@ -138,7 +138,7 @@ class Pay
      * 商户在调用微信支付提供的相关接口时，会得到微信支付返回的相关信息以及获得整个接口的响应时间。为提高整体的服务水平，协助商户一起提高服务质量，微信支付提供了相关接口调用耗时和返回信息的主动上报接口，微信支付可以根据商户侧上报的数据进一步优化网络部署，完善服务监控，和商户更好的协作为用户提供更好的业务体验。
      * @return bool
      */
-    public function report()
+    public static function report()
     {
         $url = 'https://api.mch.weixin.qq.com/payitil/report';
         $callback = file_get_contents($url);
@@ -156,7 +156,7 @@ class Pay
      * 该接口主要用于扫码原生支付模式一中的二维码链接转成短链接(weixin://wxpay/s/XXXXXX)，减小二维码数据量，提升扫描速度和精确度。
      * @return bool
      */
-    public function shortURL()
+    public static function shortURL()
     {
         $url = 'https://api.mch.weixin.qq.com/tools/shorturl';
         $callback = file_get_contents($url);

@@ -13,7 +13,7 @@ class Enterprise
      * 企业付款
      * @return bool
      */
-    public function payment()
+    public static function payment()
     {
         $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers';
         $callback = file_get_contents($url);
@@ -35,7 +35,7 @@ class Enterprise
      * @param $appid
      * @return bool
      */
-    public function info($nonce_str ,$sign, $partner_trade_no, $mch_id, $appid)
+    public static function info($nonce_str ,$sign, $partner_trade_no, $mch_id, $appid)
     {
         $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/gettransferinfo ';
         $callback = file_get_contents($url);
