@@ -104,7 +104,7 @@ class Cellular
 			self::$assetsPath = self::$webRootPath;
 		}
 		//请求资源检查
-		if (!preg_match("/^[A-Za-z0-9_\\-\\/.%&#@]+$/", $uri) && !empty($uri)) {
+		if (!preg_match("/^[A-Za-z0-9_\\-\\/.%&#@?=]+$/", $uri) && !empty($uri)) {
 			return false;
 		}
 		return $uri;
