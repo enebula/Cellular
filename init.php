@@ -94,13 +94,17 @@ class Cellular
 		$uri = isset($_GET['uri']) ? $_GET['uri'] : (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '');
 		unset($_GET['uri']);
 		//获取web根目录，当应用入口不在web根目录时有效
-		self::$webRootPath = substr($_SERVER['DOCUMENT_URI'], 0, strrpos($_SERVER['DOCUMENT_URI'], '/'));
+		if (isset($_SERVER['DOCUMENT_URI'])) {
+			self::$webRootPath = substr($_SERVER['DOCUMENT_URI'], 0, strrpos($_SERVER['DOCUMENT_URI'], '/'));
+		} else {
+			self::$webRootPath = null;
+		}
 		if (!empty(self::$webRootPath)) {
 			$uri = str_replace(self::$webRootPath, '', $uri); //过滤脚本目录
 			self::$assetsPath = self::$webRootPath;
 		}
 		//请求资源检查
-		if (!preg_match("/^[A-Za-z0-9_\\-\\/.%&#@]+$/", $uri) && !empty($uri)) {
+		if (!preg_match("/^[A-Za-z0-9_\\-\\/.%&#@?=]+$/", $uri) && !empty($uri)) {
 			return false;
 		}
 		return $uri;
