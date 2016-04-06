@@ -12,9 +12,29 @@ class Pay
     /**
      * 统一下单
      * 除被扫支付场景以外，商户系统先调用该接口在微信支付服务后台生成预支付交易单，返回正确的预支付交易回话标识后再按扫码、JSAPI、APP等不同场景生成交易串调起支付。
-     * @param $appid       string(32) * 公众账号ID 微信分配的公众账号ID（企业号corpid即为此appId）
-     * @param $mch_id      string(32) * 商户号     微信支付分配的商户号
-     * @param $device_info string(32)   设备号     终端设备号(门店号或收银设备ID)，注意：PC网页或公众号内支付请传"WEB"
+     *
+     * $param['appid']            公众账号ID     string(32)  *  微信分配的公众账号ID（企业号corpid即为此appId）
+     * $param['mch_id']           商户号        string(32)  * 微信支付分配的商户号
+     * $param['device_info']      设备号        String(32)    终端设备号(门店号或收银设备ID)，注意：PC网页或公众号内支付请传"WEB"
+     * $param['nonce_str']        随机字符串     String(32)  *  随机字符串，不长于32位。推荐随机数生成算法
+     * $param['sign']             签名          String(32)  * 签名，详见签名生成算法
+     * $param['body']             商品描述      String(128)  * 商品或支付单简要描述
+     * $param['detail']           商品详情      String(8192)   商品名称明细列表
+     * $param['attach']           附加数据      String(127)    附加数据，在查询API和支付通知中原样返回，该字段主要用于商户携带订单的自定义数据
+     * $param['out_trade_no']     商户订单号    String(32)   * 商户系统内部的订单号,32个字符内、可包含字母, 其他说明见商户订单号
+     * $param['fee_type']         货币类型      String(16)     符合ISO 4217标准的三位字母代码，默认人民币：CNY，其他值列表详见货币类型
+     * $param['total_fee']        总金额        Int         *  订单总金额，单位为分，详见支付金额
+     * $param['spbill_create_ip'] 终端IP       String(16)   *  APP和网页支付提交用户端ip，Native支付填调用微信支付API的机器IP
+     * $param['time_start']       交易起始时间  String(14)     订单生成时间，格式为yyyyMMddHHmmss，如2009年12月25日9点10分10秒表示为20091225091010。其他详见时间规则
+     * $param['time_expire']      交易结束时间  String(14)     订单失效时间，格式为yyyyMMddHHmmss，如2009年12月27日9点10分10秒表示为20091227091010。其他详见时间规则
+     * 注意：最短失效时间间隔必须大于5分钟
+     * $param['goods_tag']        商品标记     String(32)     商品标记，代金券或立减优惠功能的参数，说明详见代金券或立减优惠
+     * $param['notify_url']       通知地址     String(256)  * 接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数
+     * $param['trade_type']       交易类型     String(16)   * 取值如下：JSAPI，NATIVE，APP，详细说明见参数规定
+     * $param['product_id']       商品ID      String(32)      trade_type=NATIVE，此参数必传。此id为二维码中包含的商品ID，商户自行定义。
+     * $param['limit_pay']        指定支付方式 String(32)     no_credit--指定不能使用信用卡支付
+     * $param['openid']           用户标识    String(128)     trade_type=JSAPI，此参数必传，用户在商户appid下的唯一标识。企业号请使用【企业号OAuth2.0接口】获取企业号内成员userid，再调用【企业号userid转openid接口】进行转换
+     *
      * @return bool
      */
     public static function unifiedOrder($appid, $mch_id, $device_info = 'WEB')
