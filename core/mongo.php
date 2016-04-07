@@ -1,18 +1,17 @@
 <?php
 /**
  * Cellular Faremwork
- * Mongo驱动
+ * Mongo 驱动
  * @copyright Cellular Team
  */
 
 namespace core;
 use MongoClient;
 
-
 class Mongo extends Base
 {
-
-    public function __construct($config) {
+    public function __construct($config)
+    {
         $this->connect();
     }
 
@@ -24,20 +23,20 @@ class Mongo extends Base
      * $m = new MongoClient("mongodb://${username}:${password}@localhost/myDatabase");
      * $m = new MongoClient("mongodb://${username}:${password}@localhost", array("db" => "myDatabase"));
      */
-    private function connect() {
-      $config = $this->config('mongo');
-      $conn = 'mongodb://';
-      if (!is_null($config['username']) && !is_null($config['password']) {
-        $conn .= '${' . $config['username'] . '}:${' . $config['password'] . '}@';
-      }
-      $conn .= $config['host'] . ':' . $config['port'];
-      if (!is_null($config['database'])) {
-        $conn .= '/' . $config['database'];
-      }
-      # new MongoClient('mongodb://host:port', ['username'=>$username,'password'=>$password], ['db'=>'$database']);
-      $mongo = new MongoClient($conn);
-  		return $mongo;
+    private function connect()
+    {
+        $config = $this->config('mongo');
+        $conn = 'mongodb://';
+        if (!is_null($config['username']) && !is_null($config['password'])) {
+            $conn .= '${' . $config['username'] . '}:${' . $config['password'] . '}@';
+        }
+        $conn .= $config['host'] . ':' . $config['port'];
+        if (!is_null($config['database'])) {
+            $conn .= '/' . $config['database'];
+        }
+        # new MongoClient('mongodb://host:port', ['username'=>$username,'password'=>$password], ['db'=>'$database']);
+        $mongo = new \MongoClient($conn);
+        return $mongo;
     }
-
 }
 ?>

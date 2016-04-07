@@ -1,7 +1,7 @@
 <?php
 /**
  * Cellular Faremwork
- * Memcached 驱动器
+ * Memcached 驱动
  * @copyright Cellular Team
  */
 

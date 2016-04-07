@@ -42,7 +42,7 @@ class Pay
         if (!array_key_exists('appid', $param)) die('appid is empty');
         if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
         if (!array_key_exists('nonce_str', $param)) die('nonce_str is empty');
-        if (!array_key_exists('sign', $param)) die('sign is empty');
+        # if (!array_key_exists('sign', $param)) die('sign is empty');
         if (!array_key_exists('body', $param)) die('body is empty');
         if (!array_key_exists('out_trade_no', $param)) die('out_trade_no is empty');
         if (!array_key_exists('total_fee', $param)) die('total_fee is empty');
@@ -50,11 +50,35 @@ class Pay
         if (!array_key_exists('notify_url', $param)) die('notify_url is empty');
         if (!array_key_exists('trade_type', $param)) die('trade_type is empty');
         if ($param['trade_type'] == 'JSAPI' && !array_key_exists('openid', $param)) die ('trade_type=JSAPI openid is empty');
+        $param['sign'] = self::sign($param, 'dPlb6PKO0pjsWomCme7d6c4KSkKUywnn');
         $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
+        $callback = self::postXmlCurl(self::arrayToXml($param), $url);
+        var_dump($callback);exit;
+
+        /*
+        <xml>
+        <return_code><![CDATA[SUCCESS]]></return_code>
+        <return_msg><![CDATA[OK]]></return_msg>
+        <appid><![CDATA[wx6b4b5a99a75ee85b]]></appid>
+        <mch_id><![CDATA[1321061001]]></mch_id>
+        <device_info><![CDATA[WEB]]></device_info>
+        <nonce_str><![CDATA[IZps5LqnbvnBHtvQ]]></nonce_str>
+        <sign><![CDATA[874126F658C1139D2E3F1AD8E4BF6446]]></sign>
+        <result_code><![CDATA[SUCCESS]]></result_code>
+        <prepay_id><![CDATA[wx20160407174507dde8ef48e30112760132]]></prepay_id>
+        <trade_type><![CDATA[NATIVE]]></trade_type>
+        <code_url><![CDATA[weixin://wxpay/bizpayurl?pr=RZvMZTN]]></code_url>
+        </xml>
+        */
+
+        /*
+         * http://paysdk.weixin.qq.com/example/qrcode.php?data=weixin://wxpay/bizpayurl?pr=RZvMZTN
+         */
+
         $callback = file_get_contents($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
-            return $callback->access_token;
+            return $callback;
         } else {
             die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
         }
@@ -198,5 +222,159 @@ class Pay
             die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
         }
         return false;
+    }
+
+    /**
+     * 生成签名
+     * @param $param
+     * @param $key
+     * @return mixed 签名
+     */
+    public static function sign($param, $key)
+    {
+        # 签名步骤一：按字典顺序排序参数
+        ksort($param);
+        $string = self::arrayToQuery($param);
+        # 签名步骤二：在string后加入KEY
+        $string = $string . "&key=" . $key;
+        # 签名步骤三：MD5加密
+        $string = md5($string);
+        # 签名步骤四：所有字符转为大写
+        $result = strtoupper($string);
+        return $result;
+    }
+
+    /**
+     * 格式化参数格式化成url参数
+     * @param $param
+     * @return string
+     */
+    public static function arrayToQuery($param)
+    {
+        $buff = "";
+        foreach ($param as $k => $v) {
+            if ($k != "sign" && $v != "" && !is_array($v)) {
+                $buff .= $k . "=" . $v . "&";
+            }
+        }
+        $buff = trim($buff, "&");
+        return $buff;
+    }
+
+    /**
+     * array 转 xml
+     * @param array $arr
+     * @return string
+     */
+    public static function arrayToXml ($arr)
+    {
+        if (!is_array($arr)) die('$arr is not array');
+        $xml = '<xml>';
+        foreach ($arr as $key => $val) {
+            if (is_numeric($val)) {
+                $xml .= '<' . $key . '>' . $val . '</' . $key . '>';
+            } else {
+                $xml .= '<' . $key . '><![CDATA[' . $val . ']]></' . $key . '>';
+            }
+        }
+        $xml .= '</xml>';
+        return $xml;
+    }
+
+    /**
+     * xml 转 array
+     * @param $xml
+     * @return mixed
+     */
+    public static function xmlToArray ($xml)
+    {
+        if (!$xml) die('$xml is null');
+        # 禁止引用外部 xml 实体
+        libxml_disable_entity_loader(true);
+        $arr = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+        return $arr;
+    }
+
+    /**
+     * 输出xml字符
+     * @throws WxPayException
+     **/
+    public function ToXml()
+    {
+        if(!is_array($this->values)
+            || count($this->values) <= 0)
+        {
+            throw new WxPayException("数组数据异常！");
+        }
+
+        $xml = "<xml>";
+        foreach ($this->values as $key=>$val)
+        {
+            if (is_numeric($val)){
+                $xml.="<".$key.">".$val."</".$key.">";
+            }else{
+                $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
+            }
+        }
+        $xml.="</xml>";
+        return $xml;
+    }
+
+    /**
+     * 以post方式提交xml到对应的接口url
+     *
+     * @param string $xml  需要post的xml数据
+     * @param string $url  url
+     * @param bool $useCert 是否需要证书，默认不需要
+     * @param int $second   url执行超时时间，默认30s
+     * @return mixed
+     * @throws WxPayException
+     */
+    private static function postXmlCurl($xml, $url, $useCert = false, $second = 30)
+    {
+        $ch = curl_init();
+        //设置超时
+        curl_setopt($ch, CURLOPT_TIMEOUT, $second);
+
+        /***
+        //如果有配置代理这里就设置代理
+        if (WxPayConfig::CURL_PROXY_HOST != "0.0.0.0"
+            && WxPayConfig::CURL_PROXY_PORT != 0
+        ) {
+            curl_setopt($ch, CURLOPT_PROXY, WxPayConfig::CURL_PROXY_HOST);
+            curl_setopt($ch, CURLOPT_PROXYPORT, WxPayConfig::CURL_PROXY_PORT);
+        }
+        ***/
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);//严格校验
+        //设置header
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        //要求结果为字符串且输出到屏幕上
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+        if ($useCert == true) {
+            //设置证书
+            //使用证书：cert 与 key 分别属于两个.pem文件
+            curl_setopt($ch, CURLOPT_SSLCERTTYPE, 'PEM');
+            curl_setopt($ch, CURLOPT_SSLCERT, WxPayConfig::SSLCERT_PATH);
+            curl_setopt($ch, CURLOPT_SSLKEYTYPE, 'PEM');
+            curl_setopt($ch, CURLOPT_SSLKEY, WxPayConfig::SSLKEY_PATH);
+        }
+        //post提交方式
+        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+        //运行curl
+        $data = curl_exec($ch);
+        //返回结果
+        if ($data) {
+            curl_close($ch);
+            return $data;
+        } else {
+            $error = curl_errno($ch);
+            curl_close($ch);
+            die("curl出错，错误码:$error");
+        }
     }
 }

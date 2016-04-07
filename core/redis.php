@@ -1,7 +1,7 @@
 <?php
 /**
  * Cellular Framework
- * Redis 驱动器
+ * Redis 驱动
  * @copyright Cellular Team
  */
 
