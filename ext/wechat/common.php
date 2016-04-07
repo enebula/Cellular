@@ -107,7 +107,27 @@ class Common
      */
     public static function refershToken($appid, $refreshToken)
     {
-        $url = 'https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=' . $$appid . '&grant_type=refresh_token&refresh_token=' . $refreshToken;
+        $url = 'https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=' . $appid . '&grant_type=refresh_token&refresh_token=' . $refreshToken;
+        $callback = file_get_contents($url);
+        $callback = json_decode($callback);
+        if (empty($callback->errcode)) {
+            return $callback;
+        } else {
+            die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
+        }
+        return false;
+    }
+
+    /**
+     * 拉取用户信息(需scope为 snsapi_userinfo)
+     * @param $token
+     * @param $openID
+     * @param string $lang
+     * @return bool
+     */
+    public static function userInfo($token, $openID, $lang = 'zh_CN')
+    {
+        $url = 'https://api.weixin.qq.com/sns/userinfo?access_token=' . $token . '&openid=' . $openID . '&lang=' . $lang;
         $callback = file_get_contents($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
