@@ -50,13 +50,15 @@ class Common
 
     /**
      * 引导用户进入授权页面同意授权 获取 code
-     * @param $appid 第三方用户唯一凭证
-     * @param $url 授权后重定向的回调链接地址 请使用urlencode对链接进行处理
+     * @param string $appid 第三方用户唯一凭证
+     * @param string $url 授权后重定向的回调链接地址 请使用urlencode对链接进行处理
+     * @param string $scope 应用授权作用域 snsapi_base （不弹出授权页面，直接跳转，只能获取用户openid），snsapi_userinfo （弹出授权页面，可通过openid拿到昵称、性别、所在地。并且，即使在未关注的情况下，只要用户授权，也能获取其信息）
+     * @param null $state 重定向后会带上state参数，开发者可以填写a-zA-Z0-9的参数值，最多128字节
      */
-    public static function code($appid, $url)
+    public static function code($appid, $url, $scope = 'snsapi_base', $state = null)
     {
         $url = urlencode($url);
-        $url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . $appid . '&redirect_uri=' . $url . '&response_type=code&scope=snsapi_userinfo&state=STATE#wechat_redirect';
+        $url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=' . $appid . '&redirect_uri=' . $url . '&response_type=code&scope=' . $scope . '&state=' . $state . '#wechat_redirect';
         header('Location: ' . $url);
     }
 
