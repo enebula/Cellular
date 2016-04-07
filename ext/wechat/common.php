@@ -81,6 +81,16 @@ class Common
      */
     public static function authToken($appid, $secret, $code)
     {
+        /*
+		stdClass Object
+		(
+		[access_token] => OezXcEiiBSKSxW0eoylIeH24MzR6QFiao-MpWLIYDiNr6aLMAT9UNumXHJvhj83Pd_DsLWF12DUr4aU2iF1k7U4L2k33aa7TNZDbzdZIdNVF9lQoO2AyE6IYYaDotM_J3r05FRvtMlFBIqtZWVfcgg
+		[expires_in] => 7200
+		[refresh_token] => OezXcEiiBSKSxW0eoylIeH24MzR6QFiao-MpWLIYDiNr6aLMAT9UNumXHJvhj83PBd4FKP6X653u8lnEI9qPsuAd5V1LosxsAcWs6ZaAi45Gvuhmun7fMZZdHpwhI1kJU5CgjHi5MAFZrFgQx-Y5jQ
+		[openid] => oicL-s-7L4EJkbIk_4i1Epaps0CU
+		[scope] => snsapi_userinfo
+		)
+		*/
         $url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' . $appid . '&secret=' . $secret . '&code=' . $code . '&grant_type=authorization_code';
         $callback = file_get_contents($url);
         $callback = json_decode($callback);
