@@ -53,7 +53,6 @@ class Pay
         $param['sign'] = self::sign($param, 'dPlb6PKO0pjsWomCme7d6c4KSkKUywnn');
         $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
         $callback = self::postXmlCurl(self::arrayToXml($param), $url);
-        var_dump($callback);exit;
 
         /*
         <xml>
@@ -75,12 +74,11 @@ class Pay
          * http://paysdk.weixin.qq.com/example/qrcode.php?data=weixin://wxpay/bizpayurl?pr=RZvMZTN
          */
 
-        $callback = file_get_contents($url);
-        $callback = json_decode($callback);
-        if (empty($callback->errcode)) {
+        $callback = simplexml_load_string($callback);
+        if ($callback->return_code == 'SUCCESS' && $callback->result_code == 'SUCCESS') {
             return $callback;
         } else {
-            die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
+            die('wechat pay error: ' . $callback->return_msg);
         }
         return false;
     }
