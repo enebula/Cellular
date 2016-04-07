@@ -21,7 +21,7 @@ class Common
         $callback = file_get_contents($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
-            return $callback->access_token;
+            return $callback;
         } else {
             die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
         }
