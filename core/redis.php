@@ -1,17 +1,14 @@
 <?php
 /**
- * Cellular Faremwork
+ * Cellular Framework
  * Redis 驱动器
  * @copyright Cellular Team
  */
 
 namespace core;
-use Redis;
-
 
 class Redis extends Base
 {
-
     private $redis;
     private $config;
     private $db;
@@ -29,7 +26,7 @@ class Redis extends Base
      */
     public function save($key, $value, $time = null)
     {
-        if(null == $time) {
+        if (null == $time) {
             return $this->redis->set($key, $value);
         } else {
             return $this->redis->setex($key, $time, $value);
@@ -89,6 +86,5 @@ class Redis extends Base
     {
         $this->redis->flushall();
     }
-
 }
 ?>
