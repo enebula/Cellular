@@ -37,8 +37,19 @@ class Pay
      *
      * @return bool
      */
-    public static function unifiedOrder($appid, $mch_id, $device_info = 'WEB')
+    public static function unifiedOrder($param)
     {
+        if (!array_key_exists('appid', $param)) die('appid is empty');
+        if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
+        if (!array_key_exists('nonce_str', $param)) die('nonce_str is empty');
+        if (!array_key_exists('sign', $param)) die('sign is empty');
+        if (!array_key_exists('body', $param)) die('body is empty');
+        if (!array_key_exists('out_trade_no', $param)) die('out_trade_no is empty');
+        if (!array_key_exists('total_fee', $param)) die('total_fee is empty');
+        if (!array_key_exists('spbill_create_ip', $param)) die('spbill_create_ip is empty');
+        if (!array_key_exists('notify_url', $param)) die('notify_url is empty');
+        if (!array_key_exists('trade_type', $param)) die('trade_type is empty');
+        if ($param['trade_type'] == 'JSAPI' && !array_key_exists('openid', $param)) die ('trade_type=JSAPI openid is empty');
         $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
         $callback = file_get_contents($url);
         $callback = json_decode($callback);
