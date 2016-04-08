@@ -1,6 +1,6 @@
 <?php
 /**
- * Cellular Faremwork
+ * Cellular Framework
  * HTTP 提交输入安全检查
  * @copyright Cellular Team
  */

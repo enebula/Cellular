@@ -1,6 +1,6 @@
 <?php
 /**
- * Cellular Faremwork
+ * Cellular Framework
  * 模型
  * @copyright Cellular Team
  */

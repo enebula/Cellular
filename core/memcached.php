@@ -1,6 +1,6 @@
 <?php
 /**
- * Cellular Faremwork
+ * Cellular Framework
  * Memcached 驱动
  * @copyright Cellular Team
  */

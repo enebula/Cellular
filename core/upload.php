@@ -1,6 +1,6 @@
 <?php
 /**
- * Cellular Faremwork
+ * Cellular Framework
  * 文件上传类
  * @copyright Cellular Team
  */

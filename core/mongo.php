@@ -1,6 +1,6 @@
 <?php
 /**
- * Cellular Faremwork
+ * Cellular Framework
  * Mongo 驱动
  * @copyright Cellular Team
  */
