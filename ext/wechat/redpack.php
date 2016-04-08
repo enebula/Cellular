@@ -36,7 +36,7 @@ class RedPack
         $param['act_name']     # 活动名称 是 猜灯谜抢红包活动 String(32) 活动名称
         $param['remark']       # 备注 是 猜越多得越多，快来抢！ String(256) 备注信息
         ***/
-        $param['nonce_str'] = '';
+
         if (!array_key_exists('mch_billno', $param)) die('mch_billno is empty');
         if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
         if (!array_key_exists('wxappid', $param)) die('wxappid is empty');
@@ -45,9 +45,10 @@ class RedPack
         if (!array_key_exists('total_amount', $param)) die('total_amount is empty');
         if (!array_key_exists('total_num', $param)) die('total_num is empty');
         if (!array_key_exists('wishing', $param)) die('wishing is empty');
-        $param['client_ip'] = '';
         if (!array_key_exists('act_name', $param)) die('act_name is empty');
         if (!array_key_exists('remark', $param)) die('remark is empty');
+        $param['nonce_str'] = common::nonceStr();
+        $param['client_ip'] = '';
         $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack';
     }
 
@@ -79,7 +80,6 @@ class RedPack
         $param['remark']       # 备注    是  猜越多得越多，快来抢！  String(256)  备注信息
         ***/
 
-        $param['nonce_str'] = '';
         if (!array_key_exists('mch_billno', $param)) die('mch_billno is empty');
         if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
         if (!array_key_exists('wxappid', $param)) die('wxappid is empty');
@@ -91,6 +91,7 @@ class RedPack
         if (!array_key_exists('wishing', $param)) die('wishing is empty');
         if (!array_key_exists('act_name', $param)) die('act_name is empty');
         if (!array_key_exists('remark', $param)) die('remark is empty');
+        $param['nonce_str'] = common::nonceStr();
         $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendgroupredpack';
     }
 
@@ -111,10 +112,11 @@ class RedPack
         $param['bill_type']  # 订单类型  是  MCHT String(32) MCHT:通过商户订单号获取红包信息。
         ***/
 
-        $param['nonce_str'] = '';
         if (!array_key_exists('mch_billno', $param)) die('mch_billno is empty');
         if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
         if (!array_key_exists('appid', $param)) die('appid is empty');
+        if (!array_key_exists('bill_type', $param)) die('bill_type is empty');
+        $param['nonce_str'] = common::nonceStr();
         $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/gethbinfo';
     }
 }
