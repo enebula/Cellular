@@ -142,6 +142,22 @@ class Helper {
         $number = str_replace('.', '', $number); //在取小数点
         return intval($number);
     }
+
+    /**
+     * 使用单例模式连接Redis数据库
+     * @return Redis 对象
+     */
+    public static function redis()
+    {
+        static $redis;
+        if (isset($redis)) {
+            return $redis;
+        }
+        $config = Cellular::config('redis');
+        $redis = new \Redis();
+        $redis->connect($config['host'], $config['port']);
+        return $redis;
+    }
 }
 
 ?>
