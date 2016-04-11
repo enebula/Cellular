@@ -79,6 +79,7 @@ class Cellular
 		$assets = self::$assetsPath . DIRECTORY_SEPARATOR . self::$config['struct']['assets'];
 		define('ASSETS', self::$config['assets'] ? self::$config['assets'] : $assets);
 		define('FILE', self::$config['file'] ? self::$config['file'] : $assets);
+		define('APP_ROOT', self::$appPath ? self::$appPath : '');
 
 		//定义试图目录
 		define('VIEWROOT', self::$appPath . self::$config['struct']['view'] . DIRECTORY_SEPARATOR);
