@@ -9,7 +9,7 @@ class Menu
 {
     public static function create($token, $param)
     {
-        $url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN';
+        $url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=' . $token;
         $callback = Common::curl($url);var_dump($callback);exit;
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
