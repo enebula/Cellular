@@ -9,6 +9,26 @@ namespace ext\wechat;
 
 class Common
 {
+    public static function signature($token)
+    {
+        # 服务器配置 Token
+        if (!$token) {
+            throw new Exception('$token is not defined!');
+        }
+        $signature = $_GET["signature"];
+        $timestamp = $_GET["timestamp"];
+        $nonce = $_GET["nonce"];
+        $tmpArr = array($token, $timestamp, $nonce);
+        // use SORT_STRING rule
+        sort($tmpArr, SORT_STRING);
+        $tmpStr = implode( $tmpArr );
+        $tmpStr = sha1( $tmpStr );
+        if( $tmpStr == $signature ){
+            return true;
+        }else{
+            return false;
+        }
+    }
     /**
      * 获取 access token
      * @param $appid 第三方用户唯一凭证
@@ -171,6 +191,22 @@ class Common
             die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
         }
         return false;
+    }
+
+    /**
+     * curl 获取数据
+     * @param $url
+     * @return mixed
+     */
+    public static function curl($url)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $r = curl_exec($ch);
+        curl_close($ch);
+        return $r;
     }
 
     /**

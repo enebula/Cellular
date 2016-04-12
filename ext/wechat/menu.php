@@ -10,6 +10,14 @@ class Menu
     public static function create($token, $param)
     {
         $url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN';
+        $callback = Common::curl($url);var_dump($callback);exit;
+        $callback = json_decode($callback);
+        if (empty($callback->errcode)) {
+            return $callback;
+        } else {
+            die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
+        }
+        return false;
     }
 
     public static function get($token)
@@ -24,6 +32,14 @@ class Menu
 
     public static function current($token)
     {
-        $url = 'https://api.weixin.qq.com/cgi-bin/get_current_selfmenu_info?access_token=ACCESS_TOKEN';
+        $url = 'https://api.weixin.qq.com/cgi-bin/get_current_selfmenu_info?access_token=' . $token;
+        $callback = Common::curl($url);
+        $res = json_decode($callback);
+        if (empty($res->errcode)) {
+            return $callback;
+        } else {
+            die('wechat error: [' . $res->errcode . '] ' . $res->errmsg);
+        }
+        return false;
     }
 }
