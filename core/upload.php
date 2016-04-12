@@ -8,7 +8,7 @@
 namespace core;
 
 
-class Upload extends IO
+class Upload
 {
     /**
      * 检查文件类型
@@ -112,6 +112,14 @@ class Upload extends IO
                 return false;
                 break;
         }
+    }
+
+    private function creatDir($dir)
+    {
+        if (!is_dir($dir)) {
+            if (!@mkdir($dir, 0775, true)) return false;
+        }
+        return true;
     }
 }
 ?>

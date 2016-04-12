@@ -8,7 +8,7 @@
 namespace core;
 use Cellular;
 
-class API extends Base
+class API
 {
     protected $model;
 

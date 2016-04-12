@@ -6,8 +6,9 @@
  */
 
 namespace core;
+use Cellular;
 
-class Memcached extends Base
+class Memcached
 {
     public function __construct($config)
     {
@@ -19,7 +20,7 @@ class Memcached extends Base
      */
     private function connect()
     {
-        $config = $this->config('memcached');
+        $config = Cellular::config('memcached');
         $mc = new Memcached();
         $mc->addServer($config['host'], $config['port']);
         return $mc;

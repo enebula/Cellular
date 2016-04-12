@@ -7,8 +7,9 @@
 
 namespace core;
 use MongoClient;
+use Cellular;
 
-class Mongo extends Base
+class Mongo
 {
     public function __construct($config)
     {
@@ -25,7 +26,7 @@ class Mongo extends Base
      */
     private function connect()
     {
-        $config = $this->config('mongo');
+        $config = Cellular::config('mongo');
         $conn = 'mongodb://';
         if (!is_null($config['username']) && !is_null($config['password'])) {
             $conn .= '${' . $config['username'] . '}:${' . $config['password'] . '}@';
@@ -35,7 +36,7 @@ class Mongo extends Base
             $conn .= '/' . $config['database'];
         }
         # new MongoClient('mongodb://host:port', ['username'=>$username,'password'=>$password], ['db'=>'$database']);
-        $mongo = new \MongoClient($conn);
+        $mongo = new MongoClient($conn);
         return $mongo;
     }
 }

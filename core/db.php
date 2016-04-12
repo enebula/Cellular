@@ -8,9 +8,10 @@
 namespace core;
 use PDO;
 use PDOException;
+use Cellular;
 
 
-class DB extends Base
+class DB
 {
     private static $master; //主库连接
     private static $slave; //从库连接
@@ -35,7 +36,7 @@ class DB extends Base
      */
     function __construct()
     {
-        $config = $this->config('db');
+        $config = Cellular::config('db');
         $this->driver = $config['driver'];
         $this->db = $config['database'];
         $this->char = $config['charset'];

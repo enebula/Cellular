@@ -16,7 +16,7 @@ class Base {
     /**
     * 加载实例类
     */
-    protected function loadClass($className, $param = null)
+    public function loadClass($className, $param = null)
     {
         if (null === $this->class) $this->class = new \stdClass();
         $name = strtr(strtolower(str_replace('core.', '', $className)), '.', '_');
@@ -31,7 +31,7 @@ class Base {
      * @param $extName 组件包名
      * @return mixed
      */
-    protected function loadExt($extName)
+    public function loadExt($extName)
     {
         if (null === $this->ext) $this->ext = new \stdClass();
         $name = strtr(strtolower(str_replace('core.', '', $extName)), '.', '_');
@@ -44,7 +44,7 @@ class Base {
     /**
 	 * 载入配置信息
 	 */
-	protected function config($name)
+    public function config($name)
 	{
 		return Cellular::config($name);
 	}

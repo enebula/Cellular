@@ -6,8 +6,9 @@
  */
 
 namespace core;
+use Cellular;
 
-class Redis extends Base
+class Redis
 {
     private $redis;
     private $config;
@@ -15,7 +16,7 @@ class Redis extends Base
 
     public function __construct()
     {
-        $this->config = $this->config('redis');
+        $this->config = Cellular::config('redis');
         $this->db = 0;
         $this->redis = new Redis();
         $this->redis->connect($this->config['host'], $this->config['port']);
