@@ -18,6 +18,10 @@ class Push
     const MSG_EVENT = 'event';           # 8 event		事件消息
     const MSG_MUSIC = 'music';
     const MSG_NEWS = 'news';
+    const EVENT_SUBSCRIBE = 'subscribe';     # 订阅
+    const EVENT_UNSUBSCRIBE = 'unsubscribe'; # 取消订阅
+    const EVENT_SCAN = 'SCAN';               # 扫描带参数二维码
+    const EVENT_LOCATION = 'LOCATION';       # 上报地理位置
     private $token;
     private $msg;
     private $funcflag = false;
