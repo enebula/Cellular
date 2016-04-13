@@ -24,10 +24,7 @@ class Push
     const EVENT_LOCATION = 'LOCATION';       # 上报地理位置
     private $token;
     private $msg;
-    private $funcflag = false;
     private $receive;
-    public $debug = false;
-    private $logcallback;
 
     public function __construct($token)
     {
@@ -46,7 +43,7 @@ class Push
         $nonce = $_GET["nonce"];
         $token = $this->token;
         $tmpArr = array($token, $timestamp, $nonce);
-        // use SORT_STRING rule
+        # use SORT_STRING rule
         sort($tmpArr, SORT_STRING);
         $tmpStr = implode($tmpArr);
         $tmpStr = sha1($tmpStr);
@@ -90,7 +87,7 @@ class Push
     }
 
     /**
-     * 发送消息
+     * 设置消息
      * @param string $msg
      * @param bool $append
      * @return array|string
@@ -107,20 +104,6 @@ class Push
             return $this->msg;
         } else {
             return $this->msg;
-        }
-    }
-
-    public function setFuncFlag($flag)
-    {
-        $this->funcflag = $flag;
-        return $this;
-    }
-
-    private function log($log)
-    {
-        if ($this->debug && function_exists($this->logcallback)) {
-            if (is_array($log)) $log = print_r($log, true);
-            return call_user_func($this->logcallback, $log);
         }
     }
 
@@ -332,14 +315,12 @@ class Push
      */
     public function text($text = '')
     {
-        $FuncFlag = $this->funcflag ? 1 : 0;
         $msg = array(
             'ToUserName' => $this->getForm(),
             'FromUserName' => $this->getTo(),
             'MsgType' => self::MSG_TEXT,
             'Content' => $text,
-            'CreateTime' => time(),
-            'FuncFlag' => $FuncFlag
+            'CreateTime' => time()
         );
         $this->message($msg);
         return $this;
@@ -355,7 +336,6 @@ class Push
      */
     public function music($title, $desc, $musicurl, $hgmusicurl = '')
     {
-        $FuncFlag = $this->funcflag ? 1 : 0;
         $msg = array(
             'ToUserName' => $this->getForm(),
             'FromUserName' => $this->getTo(),
@@ -366,8 +346,7 @@ class Push
                 'Description' => $desc,
                 'MusicUrl' => $musicurl,
                 'HQMusicUrl' => $hgmusicurl
-            ),
-            'FuncFlag' => $FuncFlag
+            )
         );
         $this->message($msg);
         return $this;
@@ -390,7 +369,6 @@ class Push
      */
     public function news($newsData = array())
     {
-        $FuncFlag = $this->funcflag ? 1 : 0;
         $count = count($newsData);
 
         $msg = array(
@@ -399,8 +377,7 @@ class Push
             'MsgType' => self::MSGTYPE_NEWS,
             'CreateTime' => time(),
             'ArticleCount' => $count,
-            'Articles' => $newsData,
-            'FuncFlag' => $FuncFlag
+            'Articles' => $newsData
         );
         $this->message($msg);
         return $this;
@@ -409,7 +386,7 @@ class Push
     /**
      * 回复微信服务器, 此函数支持链式操作
      * Example: $this->text('msg tips')->reply();
-     * @param array $msg 要发送的信息, 默认取$this->_msg
+     * @param array $msg 要发送的信息, 默认取$this->msg
      * @param bool $return 是否返回信息而不抛出到浏览器 默认:否
      * @return string
      */
@@ -417,11 +394,11 @@ class Push
     {
         if (empty($msg))
             $msg = $this->msg;
-        $xmldata = $this->xml_encode($msg);
-        $this->log($xmldata);
+        $xml = $this->xml_encode($msg);
+        Log::write('reply', $xml);
         if ($return)
-            return $xmldata;
+            return $xml;
         else
-            echo $xmldata;
+            echo $xml;
     }
 }
