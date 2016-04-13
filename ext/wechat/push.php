@@ -4,8 +4,8 @@
  * 微信消息推送处理接口
  * @copyright Cellular Team
  */
-
 namespace ext\wechat;
+use core\Log;
 class Push
 {
     const MSG_TEXT = 'text';             # 1 test       文本消息
@@ -310,7 +310,7 @@ class Push
         }
         $attr = trim($attr);
         $attr = empty($attr) ? '' : " {$attr}";
-        $xml .= "<{$root}{$attr}>";
+        $xml = "<{$root}{$attr}>";
         $xml .= self::data_to_xml($data, $item, $id);
         $xml .= "</{$root}>";
         return $xml;
