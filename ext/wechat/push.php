@@ -19,11 +19,11 @@ class Push
     const MSG_MUSIC = 'music';
     const MSG_NEWS = 'news';
     private $token;
-    private $_msg;
-    private $_funcflag = false;
-    private $_receive;
+    private $msg;
+    private $funcflag = false;
+    private $receive;
     public $debug = false;
-    private $_logcallback;
+    private $logcallback;
 
     public function __construct($token)
     {
@@ -94,29 +94,29 @@ class Push
     public function message($msg = '', $append = false)
     {
         if (is_null($msg)) {
-            $this->_msg = array();
+            $this->msg = array();
         } elseif (is_array($msg)) {
             if ($append)
-                $this->_msg = array_merge($this->_msg, $msg);
+                $this->msg = array_merge($this->msg, $msg);
             else
-                $this->_msg = $msg;
-            return $this->_msg;
+                $this->msg = $msg;
+            return $this->msg;
         } else {
-            return $this->_msg;
+            return $this->msg;
         }
     }
 
     public function setFuncFlag($flag)
     {
-        $this->_funcflag = $flag;
+        $this->funcflag = $flag;
         return $this;
     }
 
     private function log($log)
     {
-        if ($this->debug && function_exists($this->_logcallback)) {
+        if ($this->debug && function_exists($this->logcallback)) {
             if (is_array($log)) $log = print_r($log, true);
-            return call_user_func($this->_logcallback, $log);
+            return call_user_func($this->logcallback, $log);
         }
     }
 
@@ -129,7 +129,7 @@ class Push
         $content = file_get_contents("php://input");
         Log::write('push', $content);
         if (!empty($content)) {
-            $this->_receive = (array)simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
+            $this->receive = (array)simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
         }
         return $this;
     }
@@ -140,8 +140,8 @@ class Push
      */
     public function getForm()
     {
-        if ($this->_receive)
-            return $this->_receive['FromUserName'];
+        if ($this->receive)
+            return $this->receive['FromUserName'];
         else
             return false;
     }
@@ -152,8 +152,8 @@ class Push
      */
     public function getTo()
     {
-        if ($this->_receive)
-            return $this->_receive['ToUserName'];
+        if ($this->receive)
+            return $this->receive['ToUserName'];
         else
             return false;
     }
@@ -164,8 +164,8 @@ class Push
      */
     public function getType()
     {
-        if (isset($this->_receive['MsgType']))
-            return $this->_receive['MsgType'];
+        if (isset($this->receive['MsgType']))
+            return $this->receive['MsgType'];
         else
             return false;
     }
@@ -176,8 +176,8 @@ class Push
      */
     public function getID()
     {
-        if (isset($this->_receive['MsgId']))
-            return $this->_receive['MsgId'];
+        if (isset($this->receive['MsgId']))
+            return $this->receive['MsgId'];
         else
             return false;
     }
@@ -188,8 +188,8 @@ class Push
      */
     public function getTime()
     {
-        if (isset($this->_receive['CreateTime']))
-            return $this->_receive['CreateTime'];
+        if (isset($this->receive['CreateTime']))
+            return $this->receive['CreateTime'];
         else
             return false;
     }
@@ -200,8 +200,8 @@ class Push
      */
     public function getContent()
     {
-        if (isset($this->_receive['Content']))
-            return $this->_receive['Content'];
+        if (isset($this->receive['Content']))
+            return $this->receive['Content'];
         else
             return false;
     }
@@ -212,8 +212,8 @@ class Push
      */
     public function getPicture()
     {
-        if (isset($this->_receive['PicUrl']))
-            return (string)$this->_receive['PicUrl'];
+        if (isset($this->receive['PicUrl']))
+            return (string)$this->receive['PicUrl'];
         else
             return false;
     }
@@ -224,11 +224,11 @@ class Push
      */
     public function getLink()
     {
-        if (isset($this->_receive['Url'])) {
+        if (isset($this->receive['Url'])) {
             return array(
-                'url' => $this->_receive['Url'],
-                'title' => $this->_receive['Title'],
-                'description' => $this->_receive['Description']
+                'url' => $this->receive['Url'],
+                'title' => $this->receive['Title'],
+                'description' => $this->receive['Description']
             );
         } else
             return false;
@@ -240,12 +240,12 @@ class Push
      */
     public function getGeo()
     {
-        if (isset($this->_receive['Location_X'])) {
+        if (isset($this->receive['Location_X'])) {
             return array(
-                'x' => $this->_receive['Location_X'],
-                'y' => $this->_receive['Location_Y'],
-                'scale' => $this->_receive['Scale'],
-                'label' => $this->_receive['Label']
+                'x' => $this->receive['Location_X'],
+                'y' => $this->receive['Location_Y'],
+                'scale' => $this->receive['Scale'],
+                'label' => $this->receive['Label']
             );
         } else
             return false;
@@ -257,10 +257,10 @@ class Push
      */
     public function getEvent()
     {
-        if (isset($this->_receive['Event'])) {
+        if (isset($this->receive['Event'])) {
             return array(
-                'event' => $this->_receive['Event'],
-                'key' => $this->_receive['EventKey'],
+                'event' => $this->receive['Event'],
+                'key' => $this->receive['EventKey'],
             );
         } else
             return false;
@@ -324,7 +324,7 @@ class Push
      */
     public function text($text = '')
     {
-        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $FuncFlag = $this->funcflag ? 1 : 0;
         $msg = array(
             'ToUserName' => $this->getForm(),
             'FromUserName' => $this->getTo(),
@@ -347,7 +347,7 @@ class Push
      */
     public function music($title, $desc, $musicurl, $hgmusicurl = '')
     {
-        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $FuncFlag = $this->funcflag ? 1 : 0;
         $msg = array(
             'ToUserName' => $this->getForm(),
             'FromUserName' => $this->getTo(),
@@ -382,7 +382,7 @@ class Push
      */
     public function news($newsData = array())
     {
-        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $FuncFlag = $this->funcflag ? 1 : 0;
         $count = count($newsData);
 
         $msg = array(
@@ -408,7 +408,7 @@ class Push
     public function reply($msg = array(), $return = false)
     {
         if (empty($msg))
-            $msg = $this->_msg;
+            $msg = $this->msg;
         $xmldata = $this->xml_encode($msg);
         $this->log($xmldata);
         if ($return)
