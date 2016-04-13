@@ -130,7 +130,7 @@ class Push
      */
     public function receive()
     {
-        $content = file_get_contents("php://input");
+        $content = Common::curl("php://input");
         Log::write('push', $content);
         if (!empty($content)) {
             $this->receive = (array)simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);

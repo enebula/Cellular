@@ -71,7 +71,7 @@ class Enterprise
 
 
         $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/gettransferinfo';
-        $callback = file_get_contents($url);
+        $callback = Common::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback->access_token;

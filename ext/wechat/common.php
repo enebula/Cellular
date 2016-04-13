@@ -38,7 +38,7 @@ class Common
     public static function accessToken($appid, $secret)
     {
         $url = 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=' . $appid . '&secret=' . $secret;
-        $callback = file_get_contents($url);
+        $callback = self::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback;
@@ -59,7 +59,7 @@ class Common
     {
         if (empty($token)) die('token is not defined');
         $url = 'https://api.weixin.qq.com/cgi-bin/user/info?access_token=' . $token . '&openid=' . $openID . '&lang=' . $lang;
-        $callback = file_get_contents($url);
+        $callback = self::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback;
@@ -113,7 +113,7 @@ class Common
 		)
 		*/
         $url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' . $appid . '&secret=' . $secret . '&code=' . $code . '&grant_type=authorization_code';
-        $callback = file_get_contents($url);
+        $callback = self::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback;
@@ -142,7 +142,7 @@ class Common
     public static function refershToken($appid, $refreshToken)
     {
         $url = 'https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=' . $appid . '&grant_type=refresh_token&refresh_token=' . $refreshToken;
-        $callback = file_get_contents($url);
+        $callback = self::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback;
@@ -162,7 +162,7 @@ class Common
     public static function userInfo($token, $openID, $lang = 'zh_CN')
     {
         $url = 'https://api.weixin.qq.com/sns/userinfo?access_token=' . $token . '&openid=' . $openID . '&lang=' . $lang;
-        $callback = file_get_contents($url);
+        $callback = self::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback;
@@ -183,7 +183,7 @@ class Common
     public static function checkAuthToken($token, $openID)
     {
         $url = 'https://api.weixin.qq.com/sns/auth?access_token=' . $token . '&openid=' . $openID;
-        $callback = file_get_contents($url);
+        $callback = self::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback;
@@ -203,7 +203,8 @@ class Common
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
         $r = curl_exec($ch);
         curl_close($ch);
         return $r;

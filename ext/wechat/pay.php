@@ -141,7 +141,7 @@ class Pay
     public static function closeOrder()
     {
         $url = 'https://api.mch.weixin.qq.com/pay/closeorder';
-        $callback = file_get_contents($url);
+        $callback = Common::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback->access_token;
@@ -162,7 +162,7 @@ class Pay
     public static function refund()
     {
         $url = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
-        $callback = file_get_contents($url);
+        $callback = Common::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback->access_token;
@@ -180,7 +180,7 @@ class Pay
     public static function refundQuery()
     {
         $url = 'https://api.mch.weixin.qq.com/pay/refundquery';
-        $callback = file_get_contents($url);
+        $callback = Common::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback->access_token;
@@ -202,7 +202,7 @@ class Pay
     public static function downloadBill()
     {
         $url = 'https://api.mch.weixin.qq.com/pay/downloadbill';
-        $callback = file_get_contents($url);
+        $callback = Common::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback->access_token;
@@ -220,7 +220,7 @@ class Pay
     public static function report()
     {
         $url = 'https://api.mch.weixin.qq.com/payitil/report';
-        $callback = file_get_contents($url);
+        $callback = Common::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback->access_token;
@@ -238,7 +238,7 @@ class Pay
     public static function shortURL()
     {
         $url = 'https://api.mch.weixin.qq.com/tools/shorturl';
-        $callback = file_get_contents($url);
+        $callback = Common::curl($url);
         $callback = json_decode($callback);
         if (empty($callback->errcode)) {
             return $callback->access_token;
