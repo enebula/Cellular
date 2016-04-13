@@ -242,7 +242,7 @@ class Push
      * 获取接收地理位置
      * @return array|bool
      */
-    public function getGeo()
+    public function getLocation()
     {
         if (isset($this->receive['Location_X'])) {
             return array(
@@ -262,12 +262,16 @@ class Push
     public function getEvent()
     {
         if (isset($this->receive['Event'])) {
-            return array(
-                'event' => $this->receive['Event'],
-                'key' => $this->receive['EventKey'],
-            );
-        } else
+            $array['event'] = $this->receive['Event'];
+        }
+        if (isset($this->receive['EventKey'])) {
+            $array['key'] = $this->receive['EventKey'];
+        }
+        if (isset($array) && count($array) > 0) {
+            return $array;
+        } else {
             return false;
+        }
     }
 
     public static function xmlSafeStr($str)
