@@ -127,7 +127,7 @@ class Push
     public function receive()
     {
         $content = file_get_contents("php://input");
-        $this->log($content);
+        Log::write('push', $content);
         if (!empty($content)) {
             $this->_receive = (array)simplexml_load_string($content, 'SimpleXMLElement', LIBXML_NOCDATA);
         }
