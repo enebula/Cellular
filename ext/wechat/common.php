@@ -196,13 +196,14 @@ class Common
     /**
      * curl 获取数据
      * @param $url
+     * @param int $timeOut
      * @return bool|string
      */
-    public static function curl($url)
+    public static function curl($url, $timeOut = 30)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeOut);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, false);
         $r = curl_exec($ch);
