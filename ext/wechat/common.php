@@ -196,7 +196,7 @@ class Common
     /**
      * curl 获取数据
      * @param $url
-     * @return mixed
+     * @return bool|string
      */
     public static function curl($url)
     {
@@ -206,6 +206,13 @@ class Common
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, false);
         $r = curl_exec($ch);
+        if (curl_errno($ch) !== 0) {
+            return false;
+        }
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($status != 200) {
+            return false;
+        }
         curl_close($ch);
         return $r;
     }
