@@ -308,7 +308,7 @@ class Push
     }
 
     /**
-     * 设置回复消息
+     * 设置回复文字消息
      * Example: $obj->text('hello')->reply();
      * @param string $text
      * @return $this
@@ -327,14 +327,79 @@ class Push
     }
 
     /**
-     * 设置回复音乐
+     * 设置回复图片消息
+     * Example: $obj->image('media_id')->reply();
+     * @param string $mediaid
+     * @return $this
+     */
+    public function image($mediaid = '')
+    {
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName' => $this->getRevTo(),
+            'MsgType' => self::MSGTYPE_IMAGE,
+            'Image' => array('MediaId' => $mediaid),
+            'CreateTime' => time()
+        );
+        $this->Message($msg);
+        return $this;
+    }
+
+    /**
+     * 设置回复语音消息
+     * Example: $obj->voice('media_id')->reply();
+     * @param string $mediaid
+     * @return $this
+     */
+    public function voice($mediaid = '')
+    {
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName' => $this->getRevTo(),
+            'MsgType' => self::MSGTYPE_VOICE,
+            'Voice' => array('MediaId' => $mediaid),
+            'CreateTime' => time()
+        );
+        $this->Message($msg);
+        return $this;
+    }
+
+    /**
+     * 设置回复视频消息
+     * Example: $obj->video('media_id','title','description')->reply();
+     * @param string $mediaid
+     * @param string $title
+     * @param string $description
+     * @return $this
+     */
+    public function video($mediaid = '', $title = '', $description = '')
+    {
+        $FuncFlag = $this->_funcflag ? 1 : 0;
+        $msg = array(
+            'ToUserName' => $this->getRevFrom(),
+            'FromUserName' => $this->getRevTo(),
+            'MsgType' => self::MSGTYPE_VIDEO,
+            'Video' => array(
+                'MediaId' => $mediaid,
+                'Title' => $title,
+                'Description' => $description
+            ),
+            'CreateTime' => time()
+        );
+        $this->Message($msg);
+        return $this;
+    }
+
+    /**
+     * 设置回复音乐消息
      * @param $title
      * @param $desc
      * @param $musicurl
      * @param string $hgmusicurl
+     * @param string $thumbmediaid 音乐图片缩略图的媒体id，非必须
      * @return $this
      */
-    public function music($title, $desc, $musicurl, $hgmusicurl = '')
+    public function music($title, $desc, $musicurl, $hgmusicurl = '', $thumbmediaid = '')
     {
         $msg = array(
             'ToUserName' => $this->getForm(),
@@ -348,6 +413,9 @@ class Push
                 'HQMusicUrl' => $hgmusicurl
             )
         );
+        if ($thumbmediaid) {
+            $msg['Music']['ThumbMediaId'] = $thumbmediaid;
+        }
         $this->message($msg);
         return $this;
     }
