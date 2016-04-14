@@ -64,8 +64,8 @@ class Pay
 
         if (!array_key_exists('appid', $param)) die('appid is empty');
         if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
-        # if (!array_key_exists('nonce_str', $param)) die('nonce_str is empty');
-        # if (!array_key_exists('sign', $param)) die('sign is empty');
+        if (!array_key_exists('nonce_str', $param)) die('nonce_str is empty');
+        if (!array_key_exists('sign', $param)) die('sign is empty');
         if (!array_key_exists('body', $param)) die('body is empty');
         if (!array_key_exists('out_trade_no', $param)) die('out_trade_no is empty');
         if (!array_key_exists('total_fee', $param)) die('total_fee is empty');
@@ -73,18 +73,13 @@ class Pay
         if (!array_key_exists('notify_url', $param)) die('notify_url is empty');
         if (!array_key_exists('trade_type', $param)) die('trade_type is empty');
         if ($param['trade_type'] == 'JSAPI' && !array_key_exists('openid', $param)) die ('trade_type=JSAPI openid is empty');
-        if (!array_key_exists('api_key', $param)) die('api_key is empty');
-        $param['nonce_str'] = common::nonceStr();
-        $key = $param['api_key'];
-        unset($param['api_key']);
-        $param['sign'] = common::sign($param, $key);
         $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
         $callback = common::postXmlCurl(common::arrayToXml($param), $url);
         $callback = simplexml_load_string($callback);
         if ($callback->return_code == 'SUCCESS' && $callback->result_code == 'SUCCESS') {
             return $callback;
         } else {
-            die('wechat pay error: ' . $callback->return_msg);
+            die('wechat.pay.unifiedOrder error: ' . $callback->err_code . ' ' . $callback->errmsg);
         }
         return false;
     }
@@ -107,27 +102,23 @@ class Pay
         $param['appid']          # 公众账号ID 是     string(32)  wxd678efh567hg6787               微信分配的公众账号ID（企业号corpid即为此appId）
         $param['mch_id']         # 商户号     是     string(32)  1230000109                       微信支付分配的商户号
         $param['transaction_id'] # 微信订单号  二选一 string(32)  1009660380201506130728806387     微信的订单号，优先使用
-        $param['out_trade_no']   # 商户订单号        string(32)  20150806125346                   商户系统内部的订单号，当没提供transaction_id时需要传这个。
+        $param['out_trade_no']   # 商户订单号  二选一 string(32)  20150806125346                   商户系统内部的订单号，当没提供transaction_id时需要传这个。
         $param['nonce_str']      # 随机字符串  是    string(32)  C380BEC2BFD727A4B6845133519F3AD6 随机字符串，不长于32位。推荐随机数生成算法
         $param['sign']           # 签名       是    string(32)  5K8264ILTKCH16CQ2502SI8ZNMTM67VS 签名，详见签名生成算法
-        $param['api_key']        # API 密钥   是    string      生成签名需要
         ***/
 
         if (!array_key_exists('appid', $param)) die('appid is empty');
         if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
         if (!array_key_exists('transaction_id', $param) && !array_key_exists('out_trade_no', $param)) die('transaction_id & out_trade_no is empty');
-        if (!array_key_exists('api_key', $param)) die('api_key is empty');
-        $param['nonce_str'] = common::nonceStr();
-        $key = $param['api_key'];
-        unset($param['api_key']);
-        $param['sign'] = common::sign($param, $key);
+        if (!array_key_exists('nonce_str', $param)) die('nonce_str is empty');
+        if (!array_key_exists('sign', $param)) die('sign is empty');
         $url = 'https://api.mch.weixin.qq.com/pay/orderquery';
         $callback = common::postXmlCurl(common::arrayToXml($param), $url);
         $callback = simplexml_load_string($callback);
         if ($callback->return_code == 'SUCCESS' && $callback->result_code == 'SUCCESS') {
             return $callback;
         } else {
-            die('wechat pay error: ' . $callback->return_msg);
+            die('wechat.pay.orderQuery error: ' . $callback->err_code . ' ' . $callback->errmsg);
         }
         return false;
     }
@@ -136,17 +127,32 @@ class Pay
      * 关闭订单
      * 以下情况需要调用关单接口：商户订单支付失败需要生成新单号重新发起支付，要对原订单号调用关单，避免重复支付；系统下单后，用户支付超时，系统退出不再受理，避免用户继续，请调用关单接口。
      * 注意：订单生成后不能马上调用关单接口，最短调用时间间隔为5分钟。
-     * @return bool
+     * @param $param
+     * @return bool|mixed
      */
-    public static function closeOrder()
+    public static function closeOrder($param)
     {
+        /***
+         * 字段                   名称        必填 类型        示例值                            描述
+         * $param['appid']        #公众账号ID 是   String(32) wx8888888888888888               微信分配的公众账号ID（企业号corpid即为此appId）
+         * $param['mch_id']       #商户号     是   String(32) 1900000109                       微信支付分配的商户号
+         * $param['out_trade_no'] #商户订单号 是   String(32) 1217752501201407033233368018     商户系统内部的订单号
+         * $param['nonce_str']    #随机字符串 是   String(32) 5K8264ILTKCH16CQ2502SI8ZNMTM67VS 商户系统内部的订单号,32个字符内、可包含字母, 其他说明见安全规范
+         * $param['sign']         #签名      是   String(32) C380BEC2BFD727A4B6845133519F3AD6 签名，详见签名生成算法
+         ***/
+
+        if (!array_key_exists('appid', $param)) die('appid is empty');
+        if (!array_key_exists('mch_id', $param)) die('mch_id is empty');
+        if (!array_key_exists('out_trade_no', $param)) die('out_trade_no is empty');
+        if (!array_key_exists('nonce_str', $param)) die('nonce_str is empty');
+        if (!array_key_exists('sign', $param)) die('sign is empty');
         $url = 'https://api.mch.weixin.qq.com/pay/closeorder';
-        $callback = Common::curl($url);
-        $callback = json_decode($callback);
-        if (empty($callback->errcode)) {
-            return $callback->access_token;
+        $callback = common::postXmlCurl(common::arrayToXml($param), $url);
+        $callback = simplexml_load_string($callback);
+        if ($callback->return_code == 'SUCCESS' && $callback->result_code == 'SUCCESS') {
+            return $callback;
         } else {
-            die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
+            die('wechat.pay.closeOrder error: ' . $callback->err_code . ' ' . $callback->errmsg);
         }
         return false;
     }
