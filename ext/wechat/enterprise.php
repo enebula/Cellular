@@ -33,6 +33,50 @@ class Enterprise
          * $param['spbill_create_ip'] # IP 地址          是 192.168.0.1    String(32)    调用接口的机器Ip地址
          ***/
 
+        /***
+         * 数据示例：
+         * <xml>
+         * <mch_appid>wxe062425f740c30d8</mch_appid>
+         * <mchid>10000098</mchid>
+         * <nonce_str>3PG2J4ILTKCH16CQ2502SI8ZNMTM67VS</nonce_str>
+         * <partner_trade_no>100000982014120919616</partner_trade_no>
+         * <openid>ohO4Gt7wVPxIT1A9GjFaMYMiZY1s</openid>
+         * <check_name>OPTION_CHECK</check_name>
+         * <re_user_name>张三</re_user_name>
+         * <amount>100</amount>
+         * <desc>节日快乐!</desc>
+         * <spbill_create_ip>10.2.3.10</spbill_create_ip>
+         * <sign>C97BDBACF37622775366F38B629F45E3</sign>
+         * </xml>
+         ***/
+
+        /***
+         * 成功示例：
+         * <xml>
+         * <return_code><![CDATA[SUCCESS]]></return_code>
+         * <return_msg><![CDATA[]]></return_msg>
+         * <mch_appid><![CDATA[wxec38b8ff840bd989]]></mch_appid>
+         * <mchid><![CDATA[10013274]]></mchid>
+         * <device_info><![CDATA[]]></device_info>
+         * <nonce_str><![CDATA[lxuDzMnRjpcXzxLx0q]]></nonce_str>
+         * <result_code><![CDATA[SUCCESS]]></result_code>
+         * <partner_trade_no><![CDATA[10013574201505191526582441]]></partner_trade_no>
+         * <payment_no><![CDATA[1000018301201505190181489473]]></payment_no>
+         * <payment_time><![CDATA[2015-05-19 15：26：59]]></payment_time>
+         * </xml>
+         ***/
+
+        /***
+         * 错误示例：
+         * <xml>
+         * <return_code><![CDATA[FAIL]]></return_code>
+         * <return_msg><![CDATA[系统繁忙,请稍后再试.]]></return_msg>
+         * <result_code><![CDATA[FAIL]]></result_code>
+         * <err_code><![CDATA[SYSTEMERROR]]></err_code>
+         * <err_code_des><![CDATA[系统繁忙,请稍后再试.]]></err_code_des>
+         * </xml>
+         ***/
+
         # 检测参数
         if (!array_key_exists('mch_appid', $param)) die('mch_appid is empty');
         if (!array_key_exists('mchid', $param)) die('mchid is empty');
