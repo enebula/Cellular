@@ -304,6 +304,35 @@ class Common
         return $r;
     }
 
+    public static function curlPost($url, $param, $second = 30)
+    {
+        if (is_array($param)) {
+            $param = http_build_query($param);
+        }
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $second);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
+        if (stripos($url, "https://") !== false) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($ch, CURLOPT_SSLVERSION, 1);
+        }
+        $r = curl_exec($ch);
+        if (curl_errno($ch) !== 0) {
+            return false;
+        }
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($status != 200) {
+            return false;
+        }
+        curl_close($ch);
+        return $r;
+    }
+
     /**
      * 以post方式提交xml到对应的接口url
      *
