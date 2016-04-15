@@ -69,7 +69,7 @@ class Cellular
 		if (isset(self::$config['timezone'])) date_default_timezone_set(self::$config['timezone']);
 
 		//获取uri
-		$uri = self::URI();
+		$uri = self::URI(); $ttt = $uri;
 		if ($uri === false) self::error('400', 'URI not allowed!');
 
 		//解析uri
@@ -361,10 +361,10 @@ class Cellular
         //载入视图文件
 		$path = self::$config['struct']['view'] . DIRECTORY_SEPARATOR . $name . '.php';
 		if ($path = self::getFilePath($path)) {
-			ob_start(); //开启缓冲区
+			//ob_start(); //开启缓冲区
 			include($path);
-			$cache = ob_get_contents();
-			ob_end_flush(); //关闭缓存并清空
+			//$cache = ob_get_contents();
+			//ob_end_flush(); //关闭缓存并清空
 		}
 	}
 

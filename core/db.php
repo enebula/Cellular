@@ -727,7 +727,10 @@ class DB
         $sql .= substr($_var, 1);
         unset($param);
         $sql .= $this->constraints();
-        return $this->query($sql);
+        if ($result = $this->query($sql)) {
+            return $result->rowCount();
+        }
+        return false;
     }
 
     /**
@@ -740,7 +743,10 @@ class DB
         }
         $sql = 'DELETE FROM `' . $this->table . '`';
         $sql .= $this->constraints();
-        return $this->query($sql);
+        if ($result = $this->query($sql)) {
+            return $result->rowCount();
+        }
+        return false;
     }
 
     /**
@@ -756,7 +762,10 @@ class DB
         }
         $sql = 'UPDATE `'. $this->getTable() .'` SET `'. $field .'` = `'. $field .'` + '. $num;
         $sql .= $this->constraints();
-        return $this->query($sql);
+        if ($result = $this->query($sql)) {
+            return $result->rowCount();
+        }
+        return false;
     }
 
     /**
@@ -772,7 +781,10 @@ class DB
         }
         $sql = 'UPDATE `'. $this->getTable() .'` SET `'. $field .'` = `'. $field .'` - '. $num;
         $sql .= $this->constraints();
-        return $this->query($sql);
+        if ($result = $this->query($sql)) {
+            return $result->rowCount();
+        }
+        return false;
     }
 
     /**
