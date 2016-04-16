@@ -158,6 +158,33 @@ class Helper {
         $redis->connect($config['host'], $config['port']);
         return $redis;
     }
+
+    /**
+     * base64 URL安全编码
+     * @param $value
+     * @return mixed|string
+     */
+    public static function encodeBase64($value)
+    {
+        $data = base64_encode($value);
+        $data = str_replace(array('+','/','='),array('-','_',''),$data);
+        return $data;
+    }
+
+    /**
+     * base64 URL安全解码
+     * @param $value
+     * @return mixed|string
+     */
+    public static function decodeBase64($value)
+    {
+        $data = str_replace(array('-','_'),array('+','/'),$value);
+        $mod4 = strlen($data) % 4;
+        if ($mod4) {
+            $data .= substr('====', $mod4);
+        }
+        return base64_decode($data);
+    }
 }
 
 ?>
