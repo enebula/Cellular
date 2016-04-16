@@ -337,7 +337,7 @@ class Push
         $msg = array(
             'ToUserName' => $this->getRevFrom(),
             'FromUserName' => $this->getRevTo(),
-            'MsgType' => self::MSGTYPE_IMAGE,
+            'MsgType' => self::MSG_IMAGE,
             'Image' => array('MediaId' => $mediaid),
             'CreateTime' => time()
         );
@@ -356,7 +356,7 @@ class Push
         $msg = array(
             'ToUserName' => $this->getRevFrom(),
             'FromUserName' => $this->getRevTo(),
-            'MsgType' => self::MSGTYPE_VOICE,
+            'MsgType' => self::MSG_VOICE,
             'Voice' => array('MediaId' => $mediaid),
             'CreateTime' => time()
         );
@@ -378,7 +378,7 @@ class Push
         $msg = array(
             'ToUserName' => $this->getRevFrom(),
             'FromUserName' => $this->getRevTo(),
-            'MsgType' => self::MSGTYPE_VIDEO,
+            'MsgType' => self::MSG_VIDEO,
             'Video' => array(
                 'MediaId' => $mediaid,
                 'Title' => $title,
@@ -442,7 +442,7 @@ class Push
         $msg = array(
             'ToUserName' => $this->getForm(),
             'FromUserName' => $this->getTo(),
-            'MsgType' => self::MSGTYPE_NEWS,
+            'MsgType' => self::MSG_NEWS,
             'CreateTime' => time(),
             'ArticleCount' => $count,
             'Articles' => $newsData
