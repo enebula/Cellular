@@ -125,7 +125,7 @@ class Push
      * 获取消息发送者
      * @return bool
      */
-    public function getForm()
+    public function getFrom()
     {
         if ($this->receive)
             return $this->receive['FromUserName'];
@@ -316,7 +316,7 @@ class Push
     public function text($text = '')
     {
         $msg = array(
-            'ToUserName' => $this->getForm(),
+            'ToUserName' => $this->getFrom(),
             'FromUserName' => $this->getTo(),
             'MsgType' => self::MSG_TEXT,
             'Content' => $text,
@@ -402,7 +402,7 @@ class Push
     public function music($title, $desc, $musicurl, $hgmusicurl = '', $thumbmediaid = '')
     {
         $msg = array(
-            'ToUserName' => $this->getForm(),
+            'ToUserName' => $this->getFrom(),
             'FromUserName' => $this->getTo(),
             'CreateTime' => time(),
             'MsgType' => self::MSG_MUSIC,
@@ -440,7 +440,7 @@ class Push
         $count = count($newsData);
 
         $msg = array(
-            'ToUserName' => $this->getForm(),
+            'ToUserName' => $this->getFrom(),
             'FromUserName' => $this->getTo(),
             'MsgType' => self::MSG_NEWS,
             'CreateTime' => time(),
