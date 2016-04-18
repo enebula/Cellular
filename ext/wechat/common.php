@@ -49,6 +49,25 @@ class Common
     }
 
     /**
+     * 获取微信服务器 IP 地址
+     * 如果公众号基于安全等考虑，需要获知微信服务器的 IP 地址列表，以便进行相关限制，可以通过该接口获得微信服务器 IP 地址列表。
+     * @param $token
+     * @return bool|string
+     */
+    public static function Server($token)
+    {
+        $url = 'https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=' . $token;
+        $callback = self::curl($url);
+        $callback = json_decode($callback);
+        if (empty($callback->errcode)) {
+            return $callback;
+        } else {
+            die('wechat error: [' . $callback->errcode . '] ' . $callback->errmsg);
+        }
+        return false;
+    }
+
+    /**
      * 获取用户基本信息（包括UnionID机制）
      * @param string $token 调用接口凭证
      * @param string $openID 普通用户的标识，对当前公众号唯一
