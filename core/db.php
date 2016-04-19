@@ -185,7 +185,7 @@ class DB
                 $sql = explode('?', $value);
                 $value = null;
                 foreach ($sql as $key => $val) {
-                    $value .= $val.(isset($this->param[$key]) ? '?:['.$this->param[$key].']' : '');
+                    $value .= $val.(isset($this->param[$key]) ? '['.$this->param[$key].']' : '');
                 }
             }
             $this->debug[] = $value;
@@ -239,6 +239,37 @@ class DB
             $this->join[] = $join;
         } else {
             die('leftJoin param is null');
+        }
+        return $this;
+    }
+
+    public function rightJoin()
+    {
+        $num = func_num_args();
+        $var = func_get_args();
+        if ($num > 1) {
+            if (strpos($var[0], ':')) {
+                $temp = explode(':', $var[0]);
+                $table = '`' . $this->getTable($temp[0]) . '` as `' . $this->getTable($temp[1]) . '`';
+            } else {
+                $table = '`' . $this->getTable($var[0]) . '`';
+            }
+            $join = ' RIGHT JOIN ' . $table . ' ON ';
+            switch ($num) {
+                case 2:
+                    $join .= $this->formatField($var[1]);
+                    break;
+                case 3:
+                    $join .= $this->formatField($var[1]) . '=' . $this->formatField($var[2]);
+                    break;
+                case 4:
+                    $var[2] = in_array($var[2], array('=', '>', '<', '>=', '<=', '<>')) ? $var[2] : '=';
+                    $join .= $this->formatField($var[1]) . $var[2] . $this->formatField($var[3]);
+                    break;
+            }
+            $this->join[] = $join;
+        } else {
+            die('rightJoin param is null');
         }
         return $this;
     }
