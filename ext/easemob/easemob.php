@@ -319,7 +319,7 @@ class Easemob
             $url .= '?' . substr($url, 1);
         }
         $url = $this->url . 'chatgroups' . $url;
-        $result = $this->curl($url);
+        $result = $this->curl($url, null, null, 'GET');
         return $result;
     }
 
@@ -331,7 +331,7 @@ class Easemob
     public function groupDetail($param)
     {
         $url = $this->url . 'chatgroups' . implode(',' . $param);
-        $result = $this->curl($url);
+        $result = $this->curl($url, null, null, 'GET');
         return $result;
     }
 
@@ -367,17 +367,40 @@ class Easemob
 
     /**
      * 修改群组信息
-     * @param $param['group_id'] 群组 ID 必填
-     * @param $param['groupname'] 群组名称 修改时值不能包含斜杠("/")
-     * @param $param['description'] 群组描述 修改时值不能包含斜杠("/")。有空格时需要用“+”代替。
-     * @param $param['maxusers'] 群组成员最大数(包括群主) 值为数值类型
+     * @param $param ['group_id'] 群组 ID 必填
+     * @param $param ['groupname'] 群组名称 修改时值不能包含斜杠("/")
+     * @param $param ['description'] 群组描述 修改时值不能包含斜杠("/")。有空格时需要用“+”代替。
+     * @param $param ['maxusers'] 群组成员最大数(包括群主) 值为数值类型
      * @return bool|mixed
      */
     public function editGroup($param)
     {
         $url = $this->url . 'chatgroups/' . $param['group_id'];
         unset($param['group_id']);
-        $result = $this->curl($url, $param);
+        $result = $this->curl($url, $param, null, 'PUT');
+        return $result;
+    }
+
+    /**
+     * @param $param ['group_id'] 群组 ID 必填
+     * @return bool|mixed
+     */
+    public function deleteGroup($param)
+    {
+        $url = $this->url . 'chatgroups/' . $param['group_id'];
+        $result = $this->curl($url, null, null, 'DELETE');
+        return $result;
+    }
+
+    /**
+     * 获取群组中的所有成员
+     * @param $param['group_id'] 群组 ID 必填
+     * @return bool|mixed
+     */
+    public function groupUser($param)
+    {
+        $url = $this->url . 'chatgroups/' . $param['group_id'] . '/users';
+        $result = $this->curl($url, null, null, 'GET');
         return $result;
     }
 
@@ -386,10 +409,11 @@ class Easemob
      * @param $url
      * @param null $param
      * @param null $header
+     * @param string $method
      * @param int $second
      * @return bool|mixed
      */
-    public function curl($url, $param = null, $header = null, $second = 30)
+    public function curl($url, $param = null, $header = null, $method = 'POST', $second = 30)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -400,6 +424,7 @@ class Easemob
         } else {
             curl_setopt($ch, CURLOPT_HEADER, $header);
         }
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         if ($param !== null) {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $param);
