@@ -4,10 +4,7 @@
  * 微信支付银行
  * @copyright Cellular Team
  */
-
 namespace ext\wechat;
-
-
 class Bank
 {
     public static function bankName($id)
